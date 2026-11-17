@@ -1,0 +1,8 @@
+@'
+**/.vs/
+**/bin/
+**/obj/
+**/*.user
+**/*.suo
+.idea/
+'@ | Set-Content -Path ".gitignore" -Encoding utf8
