@@ -1,4 +1,5 @@
-﻿using kids_app.Data;
+﻿
+using kids_app.Data;
 using kids_app.Dto.CommonApiDto;
 using kids_app.Dto.Subject;
 using kids_app.Models;
@@ -7,57 +8,72 @@ using Microsoft.EntityFrameworkCore;
 
 namespace kids_app.Services.Service
 {
-    public class SubjectService:ISubjectService
+    public class SubjectService : ISubjectService
     {
         private readonly AppDbContext _context;
-        private readonly IConfiguration _configuration;
 
-        public SubjectService(AppDbContext context,IConfiguration configuration)
+        public SubjectService(AppDbContext context)
         {
-            _context = context;
-            _configuration = configuration;
+            _context = context
+                ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task<ResponceDto<SubjectDto>> AddSubject(SubjectDto subjectDto)
+        // ==========================================
+        // 1. ADD SUBJECT
+        // ==========================================
+        public async Task<ResponceDto<SubjectDto>> AddSubject(
+            SubjectDto subjectDto)
         {
             var subject = new Subject
             {
                 SubjectName = subjectDto.SubjectName,
-                slug = subjectDto.slug
+                slug = subjectDto.slug,
+                IsActive = subjectDto.IsActive
             };
+
             await _context.Subjects.AddAsync(subject);
             await _context.SaveChangesAsync();
 
             return new ResponceDto<SubjectDto>
             {
                 Success = true,
-                Message = "Subject Added SucceFully",
+                Message = "Subject Added Successfully",
                 Data = new SubjectDto
                 {
+                    SubjectId = subject.SubjectId,
                     SubjectName = subject.SubjectName,
-                    slug = subject.slug
+                    slug = subject.slug,
+                    IsActive = subject.IsActive
                 },
                 Errors = new List<string>()
             };
         }
 
+        // ==========================================
+        // 2. GET ALL ACTIVE SUBJECTS
+        // ==========================================
         public async Task<ResponceDto<List<SubjectDto>>> GetSubject()
         {
             var subjects = await _context.Subjects
-                           .Select(x => new SubjectDto
-                           {
-                               SubjectName = x.SubjectName,
-                               slug = x.slug
-                           })
-                           .ToListAsync();
+                .AsNoTracking()
+                .Where(x => x.IsActive)
+                .OrderBy(x => x.SubjectName)
+                .Select(x => new SubjectDto
+                {
+                    SubjectId = x.SubjectId,
+                    SubjectName = x.SubjectName,
+                    slug = x.slug,
+                    IsActive = x.IsActive
+                })
+                .ToListAsync();
+
             return new ResponceDto<List<SubjectDto>>
             {
                 Success = true,
-                Message = "Subject Get all SucceFully",
+                Message = "Subjects Retrieved Successfully",
                 Data = subjects,
                 Errors = new List<string>()
             };
-
         }
     }
 }

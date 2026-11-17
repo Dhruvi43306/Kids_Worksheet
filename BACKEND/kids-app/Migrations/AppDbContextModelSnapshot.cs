@@ -40,7 +40,7 @@ namespace kids_app.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Difficulties", (string)null);
+                    b.ToTable("Difficulties");
                 });
 
             modelBuilder.Entity("kids_app.Models.GeneratedQuestion", b =>
@@ -78,7 +78,7 @@ namespace kids_app.Migrations
 
                     b.HasIndex("QuestionTypeId");
 
-                    b.ToTable("GeneratedQuestions", (string)null);
+                    b.ToTable("GeneratedQuestions");
                 });
 
             modelBuilder.Entity("kids_app.Models.GeneratedWorksheet", b =>
@@ -134,7 +134,7 @@ namespace kids_app.Migrations
 
                     b.HasIndex("VisualStyleId");
 
-                    b.ToTable("GeneratedWorksheets", (string)null);
+                    b.ToTable("GeneratedWorksheets");
                 });
 
             modelBuilder.Entity("kids_app.Models.LearningLevel", b =>
@@ -167,7 +167,66 @@ namespace kids_app.Migrations
                     b.HasIndex("LevelName")
                         .IsUnique();
 
-                    b.ToTable("LearningLevels", (string)null);
+                    b.ToTable("LearningLevels");
+                });
+
+            modelBuilder.Entity("kids_app.Models.PreGeneratedWorksheet", b =>
+                {
+                    b.Property<int>("PreGeneratedWorksheetId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("DifficultyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileType")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("ThumbnailUrl")
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
+
+                    b.Property<int>("TopicLevelConfigurationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("WorksheetCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("WorksheetTitle")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<string>("WorksheetUrl")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
+
+                    b.HasKey("PreGeneratedWorksheetId");
+
+                    b.HasIndex("DisplayOrder");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("WorksheetCategoryId");
+
+                    b.HasIndex("TopicLevelConfigurationId", "DifficultyId", "WorksheetCategoryId");
+
+                    b.ToTable("PreGeneratedWorksheets");
                 });
 
             modelBuilder.Entity("kids_app.Models.QuestionCountOption", b =>
@@ -190,7 +249,7 @@ namespace kids_app.Migrations
                     b.HasIndex("TopicLevelConfigurationId", "QuestionCount")
                         .IsUnique();
 
-                    b.ToTable("QuestionCountOptions", (string)null);
+                    b.ToTable("QuestionCountOptions");
                 });
 
             modelBuilder.Entity("kids_app.Models.QuestionTemplate", b =>
@@ -220,7 +279,7 @@ namespace kids_app.Migrations
 
                     b.HasKey("QuestionTemplateId");
 
-                    b.ToTable("QuestionTemplates", (string)null);
+                    b.ToTable("QuestionTemplates");
                 });
 
             modelBuilder.Entity("kids_app.Models.QuestionType", b =>
@@ -256,7 +315,7 @@ namespace kids_app.Migrations
 
                     b.HasIndex("WorksheetCategoryId");
 
-                    b.ToTable("QuestionTypes", (string)null);
+                    b.ToTable("QuestionTypes");
                 });
 
             modelBuilder.Entity("kids_app.Models.Subject", b =>
@@ -281,7 +340,7 @@ namespace kids_app.Migrations
                     b.HasIndex("slug")
                         .IsUnique();
 
-                    b.ToTable("Subjects", (string)null);
+                    b.ToTable("Subjects");
                 });
 
             modelBuilder.Entity("kids_app.Models.TopicLevelConfiguration", b =>
@@ -312,7 +371,7 @@ namespace kids_app.Migrations
                     b.HasIndex("TopicId", "LevelId")
                         .IsUnique();
 
-                    b.ToTable("TopicLevelConfigurations", (string)null);
+                    b.ToTable("TopicLevelConfigurations");
                 });
 
             modelBuilder.Entity("kids_app.Models.TopicLevelDifficulty", b =>
@@ -327,7 +386,7 @@ namespace kids_app.Migrations
 
                     b.HasIndex("DifficultyId");
 
-                    b.ToTable("TopicLevelDifficulties", (string)null);
+                    b.ToTable("TopicLevelDifficulties");
                 });
 
             modelBuilder.Entity("kids_app.Models.TopicLevelQuestionType", b =>
@@ -342,7 +401,7 @@ namespace kids_app.Migrations
 
                     b.HasIndex("QuestionTypeId");
 
-                    b.ToTable("TopicLevelQuestionTypes", (string)null);
+                    b.ToTable("TopicLevelQuestionTypes");
                 });
 
             modelBuilder.Entity("kids_app.Models.TopicLevelVisualStyle", b =>
@@ -357,7 +416,7 @@ namespace kids_app.Migrations
 
                     b.HasIndex("VisualStyleId");
 
-                    b.ToTable("TopicLevelVisualStyles", (string)null);
+                    b.ToTable("TopicLevelVisualStyles");
                 });
 
             modelBuilder.Entity("kids_app.Models.VisualStyle", b =>
@@ -384,7 +443,7 @@ namespace kids_app.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("VisualStyles", (string)null);
+                    b.ToTable("VisualStyles");
                 });
 
             modelBuilder.Entity("kids_app.Models.VisualStyleItem", b =>
@@ -415,7 +474,7 @@ namespace kids_app.Migrations
                     b.HasIndex("VisualStyleId", "ItemName")
                         .IsUnique();
 
-                    b.ToTable("VisualStyleItems", (string)null);
+                    b.ToTable("VisualStyleItems");
                 });
 
             modelBuilder.Entity("kids_app.Models.WorksheetCategory", b =>
@@ -450,7 +509,7 @@ namespace kids_app.Migrations
                     b.HasIndex("TopicId", "code")
                         .IsUnique();
 
-                    b.ToTable("worksheetCategories", (string)null);
+                    b.ToTable("worksheetCategories");
                 });
 
             modelBuilder.Entity("kids_app.Models.WorksheetTopics", b =>
@@ -481,7 +540,7 @@ namespace kids_app.Migrations
                     b.HasIndex("SubjectId", "Slug")
                         .IsUnique();
 
-                    b.ToTable("WorksheetTopics", (string)null);
+                    b.ToTable("WorksheetTopics");
                 });
 
             modelBuilder.Entity("kids_app.Models.GeneratedQuestion", b =>
@@ -534,6 +593,25 @@ namespace kids_app.Migrations
                     b.Navigation("Topic");
 
                     b.Navigation("VisualStyle");
+                });
+
+            modelBuilder.Entity("kids_app.Models.PreGeneratedWorksheet", b =>
+                {
+                    b.HasOne("kids_app.Models.WorksheetCategory", "WorksheetCategory")
+                        .WithMany()
+                        .HasForeignKey("WorksheetCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("kids_app.Models.TopicLevelDifficulty", "TopicLevelDifficulty")
+                        .WithMany()
+                        .HasForeignKey("TopicLevelConfigurationId", "DifficultyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("TopicLevelDifficulty");
+
+                    b.Navigation("WorksheetCategory");
                 });
 
             modelBuilder.Entity("kids_app.Models.QuestionCountOption", b =>

@@ -84,6 +84,186 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "kids_app.Controllers.PreGeneratedWorksheetController",
+    "Method": "GetSubjects",
+    "RelativePath": "api/pre-generated-worksheets/subjects",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.List\u00601[[kids_app.DTOs.PreGeneratedWorksheet.PreGeneratedSubjectDto, kids-app, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "kids_app.Controllers.PreGeneratedWorksheetController",
+    "Method": "GetTopicsBySubject",
+    "RelativePath": "api/pre-generated-worksheets/subjects/{subjectId}/topics",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "subjectId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.List\u00601[[kids_app.DTOs.PreGeneratedWorksheet.PreGeneratedTopicDto, kids-app, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "kids_app.Controllers.PreGeneratedWorksheetController",
+    "Method": "GetCategories",
+    "RelativePath": "api/pre-generated-worksheets/topics/{topicId}/categories",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "topicId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.List\u00601[[kids_app.DTOs.PreGeneratedWorksheet.PreGeneratedWorksheetCategoryDto, kids-app, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "kids_app.Controllers.PreGeneratedWorksheetController",
+    "Method": "GetTopicOptions",
+    "RelativePath": "api/pre-generated-worksheets/topics/{topicId}/options",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "topicId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "kids_app.DTOs.PreGeneratedWorksheet.PreGeneratedTopicOptionsDto",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "kids_app.Controllers.PreGeneratedWorksheetController",
+    "Method": "GetWorksheets",
+    "RelativePath": "api/pre-generated-worksheets/topics/{topicId}/worksheets",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "topicId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "categoryId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "levelId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "difficultyId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.List\u00601[[kids_app.DTOs.PreGeneratedWorksheet.PreGeneratedWorksheetDto, kids-app, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "kids_app.Controllers.PreGeneratedWorksheetController",
+    "Method": "GetWorksheetsAsync",
+    "RelativePath": "api/pre-generated-worksheets/topics/{topicId}/worksheets",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "topicId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "categoryId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "levelId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "difficultyId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.List\u00601[[kids_app.DTOs.PreGeneratedWorksheet.PreGeneratedWorksheetDto, kids-app, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
     "ContainingType": "kids_app.Controllers.QuestionCountOptionController",
     "Method": "GetAll",
     "RelativePath": "api/QuestionCountOption",
@@ -556,7 +736,7 @@
   },
   {
     "ContainingType": "kids_app.Controller.WorkSheetTopicController",
-    "Method": "GetWorkSheetTopic",
+    "Method": "GetAll",
     "RelativePath": "api/WorkSheetTopic",
     "HttpMethod": "GET",
     "IsController": true,
@@ -566,23 +746,7 @@
   },
   {
     "ContainingType": "kids_app.Controller.WorkSheetTopicController",
-    "Method": "AddWorkSheetTopic",
-    "RelativePath": "api/WorkSheetTopic",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "worksheetTopicDto",
-        "Type": "kids_app.Dto.WorksheetTopic.WorksheetTopicDto",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "kids_app.Controller.WorkSheetTopicController",
-    "Method": "GetWorkSheetTopicBySubject",
+    "Method": "GetBySubject",
     "RelativePath": "api/WorkSheetTopic/subject/{subjectSlug}",
     "HttpMethod": "GET",
     "IsController": true,
@@ -598,7 +762,7 @@
   },
   {
     "ContainingType": "kids_app.Controller.WorkSheetTopicController",
-    "Method": "GetWorkSheetTopicBySlug",
+    "Method": "GetBySlug",
     "RelativePath": "api/WorkSheetTopic/subject/{subjectSlug}/{slug}",
     "HttpMethod": "GET",
     "IsController": true,

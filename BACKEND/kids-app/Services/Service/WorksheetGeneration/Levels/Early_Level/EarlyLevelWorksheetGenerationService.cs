@@ -30,6 +30,8 @@ namespace kids_app.Services
                 {
                     "IDENTIFY" =>
                         GenerateIdentifyOddEven(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, visualStyleName, usedGameCombinations),
+                    "ODD_EVEN_OBJECT_TRANSFER" or "ODD_EVEN_OBJECT_PACKING_REMAINDER" or "ODD_EVEN_OBJECT_REMOVAL_TARGET" or "ODD_EVEN_HIDDEN_OBJECT_PARITY" =>
+                        GenerateOddEvenObjectWithParityOfMystery(questionNumber,questionType.QuestionTypeId,questionType.Code ?? string.Empty,levelId,difficultyId,usedGameCombinations),
 
                     "CIRCLE_ODD" =>
                         GenerateCircleOdd(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedNumbers),

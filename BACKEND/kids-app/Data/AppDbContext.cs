@@ -1,4 +1,4 @@
-﻿using kids_app.Models;
+using kids_app.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace kids_app.Data
@@ -21,10 +21,9 @@ namespace kids_app.Data
         public DbSet<QuestionTemplate> QuestionTemplates { get; set; }
         public DbSet<GeneratedWorksheet> GeneratedWorksheets { get; set; }
         public DbSet<GeneratedQuestion> GeneratedQuestions { get; set; }
-
         public DbSet<WorksheetCategory> worksheetCategories { get; set; }
-
         public DbSet<VisualStyleItem> VisualStyleItems { get; set; }
+        public DbSet<PreGeneratedWorksheet> PreGeneratedWorksheets { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,10 +33,10 @@ namespace kids_app.Data
             modelBuilder.Entity<Subject>(entity =>
             {
                 entity.HasKey(x => x.SubjectId);
-          
+
                 entity.HasIndex(x => x.slug).IsUnique();
 
-                
+
 
             });
 
@@ -45,7 +44,7 @@ namespace kids_app.Data
             {
                 entity.HasKey(x => x.TopicId);
                 entity.HasOne(s => s.Subject)
-                
+
                .WithMany(x => x.Topics)
                .HasForeignKey(s => s.SubjectId)
                .OnDelete(DeleteBehavior.Restrict);
@@ -232,10 +231,59 @@ namespace kids_app.Data
                 })
                 .IsUnique();
             });
+
+
+            modelBuilder.Entity<PreGeneratedWorksheet>(entity =>
+            {
+                entity.HasKey(x => x.PreGeneratedWorksheetId);
+
+                entity.Property(x => x.WorksheetTitle)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(x => x.WorksheetUrl)
+                    .IsRequired()
+                    .HasMaxLength(2000);
+
+                entity.Property(x => x.ThumbnailUrl)
+                    .HasMaxLength(2000);
+
+                entity.Property(x => x.FileType)
+                    .IsRequired()
+                    .HasMaxLength(10);
+
+                // Topic + Level + Difficulty relationship
+                entity.HasOne(x => x.TopicLevelDifficulty)
+                    .WithMany()
+                    .HasForeignKey(x => new
+                    {
+                        x.TopicLevelConfigurationId,
+                        x.DifficultyId
+                    })
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                // Category relationship
+                entity.HasOne(x => x.WorksheetCategory)
+                    .WithMany()
+                    .HasForeignKey(x => x.WorksheetCategoryId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(x => new
+                {
+                    x.TopicLevelConfigurationId,
+                    x.DifficultyId,
+                    x.WorksheetCategoryId
+                });
+
+                entity.HasIndex(x => x.IsActive);
+                entity.HasIndex(x => x.DisplayOrder);
+            });
+
+
         }
 
-       
-        
+
+
 
     }
 }

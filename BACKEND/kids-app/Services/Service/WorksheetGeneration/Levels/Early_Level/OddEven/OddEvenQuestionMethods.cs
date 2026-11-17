@@ -1,6 +1,7 @@
 using kids_app.Dto.GenratedWorkSheet;
 using kids_app.Models;
 using kids_app.Services.Configurations.Addition;
+using kids_app.Services.Configurations.OddEven;
 using System.Text.Json;
 
 namespace kids_app.Services
@@ -418,6 +419,307 @@ namespace kids_app.Services
             };
 
             return CreateQuestion(questionNumber, questionTypeId, questionText, data, answer);
+        }
+
+        private GeneratedQuestion GenerateOddEvenObjectWithParityOfMystery(int questionNumber,int questionTypeId,string code,int levelId,int difficultyId,HashSet<string> usedGameCombinations)
+        {
+            if (usedGameCombinations == null)
+                throw new ArgumentNullException(nameof(usedGameCombinations));
+
+            code = (code ?? string.Empty)
+                .Trim()
+                .ToUpperInvariant();
+
+            if (levelId != 3)
+                throw new ArgumentOutOfRangeException(
+                    nameof(levelId),
+                    "These Odd/Even object question types support Level 3 only.");
+
+            int actualDifficulty = ResolveDifficulty(difficultyId);
+
+            if (code == "ODD_EVEN_OBJECT_TRANSFER")
+            {
+                DifficultyRange range = GetDifficultyRange(OddEvenDifficultyConfig.ObjectTransferByLevel,levelId,actualDifficulty);
+
+                var counts = Enumerable.Range(
+                    range.Min,
+                    range.Max - range.Min + 1).ToList();
+
+                var candidates = (
+                    from basketA in counts
+                    from basketB in counts
+                    where basketA > 1
+                    select new
+                    {
+                        BasketA = basketA,
+                        BasketB = basketB
+                    }
+                ).ToList();
+
+                string keyPrefix =
+                    $"{code}:L{levelId}:D{actualDifficulty}";
+
+                var selected = GetUnusedCandidate(
+                    candidates,
+                    keyPrefix,
+                    x => $"{x.BasketA}:{x.BasketB}",
+                    usedGameCombinations);
+
+                // Move one star from A to B.
+                int basketAAfter = selected.BasketA - 1;
+                int basketBAfter = selected.BasketB + 1;
+
+                string parityA =
+                    basketAAfter % 2 == 0 ? "Even" : "Odd";
+
+                string parityB =
+                    basketBAfter % 2 == 0 ? "Even" : "Odd";
+
+                string correctAnswer = $"{parityA} / {parityB}";
+
+                string questionText =
+                    $"Basket A contains {selected.BasketA} stars and " +
+                    $"Basket B contains {selected.BasketB} stars. " +
+                    "Move one star from Basket A to Basket B. " +
+                    "What are the parities of both baskets afterward?";
+
+                var options = new[]
+                {
+            "Odd / Odd",
+            "Odd / Even",
+            "Even / Odd",
+            "Even / Even"
+        };
+
+                var data = new
+                {
+                    renderKey = "OddEvenObjectWithParityOfMystery",
+                    questionType = code,
+                    title = "Object Transfer Challenge",
+                    questionText,
+
+                    objectName = "stars",
+                    objectIcon = "⭐",
+
+                    basketACount = selected.BasketA,
+                    basketBCount = selected.BasketB,
+
+                    moveCount = 1,
+                    fromBasket = "A",
+                    toBasket = "B",
+
+                    options,
+                    answerMode = "choice",
+                    answerType = "basketParity"
+                };
+
+                return CreateQuestion(questionNumber,questionTypeId,questionText,data,correctAnswer);
+            }
+
+            if (code == "ODD_EVEN_OBJECT_PACKING_REMAINDER")
+            {
+                DifficultyRange range = GetDifficultyRange(
+                    OddEvenDifficultyConfig.ObjectPackingRemainderByLevel,
+                    levelId,
+                    actualDifficulty);
+
+                var candidates = Enumerable.Range(
+                    range.Min,
+                    range.Max - range.Min + 1)
+                    .Select(total => new
+                    {
+                        TotalObjects = total,
+                        GroupSize = 3
+                    })
+                    .ToList();
+
+                string keyPrefix =
+                    $"{code}:L{levelId}:D{actualDifficulty}";
+
+                var selected = GetUnusedCandidate(
+                    candidates,
+                    keyPrefix,
+                    x => x.TotalObjects.ToString(),
+                    usedGameCombinations);
+
+                int remainder =
+                    selected.TotalObjects % selected.GroupSize;
+
+                string remainderParity =
+                    remainder % 2 == 0 ? "Even" : "Odd";
+
+                string correctAnswer =
+                    $"{remainder} ({remainderParity})";
+
+                string questionText =
+                    $"There are {selected.TotalObjects} crayons. " +
+                    $"Pack them into boxes of {selected.GroupSize}. " +
+                    "How many crayons will be left over, and is the " +
+                    "leftover count odd or even?";
+
+                var options = new[]
+                {
+            "0 (Even)",
+            "1 (Odd)",
+            "2 (Even)"
+        };
+
+                var data = new
+                {
+                    renderKey = "OddEvenObjectWithParityOfMystery",
+                    questionType = code,
+                    title = "Object Packing Challenge",
+                    questionText,
+
+                    objectName = "crayons",
+                    objectIcon = "🖍️",
+
+                    totalObjectCount = selected.TotalObjects,
+                    groupSize = selected.GroupSize,
+
+                    options,
+                    answerMode = "choice",
+                    answerType = "remainderAndParity"
+                };
+
+                return CreateQuestion(questionNumber,questionTypeId,questionText,data,correctAnswer);
+            }
+
+            if (code == "ODD_EVEN_OBJECT_REMOVAL_TARGET")
+            {
+                DifficultyRange range = GetDifficultyRange(OddEvenDifficultyConfig.ObjectRemovalTargetByLevel,levelId,actualDifficulty);
+
+                var numbers = Enumerable.Range(range.Min,range.Max - range.Min + 1).ToList();
+
+                var candidates = (
+                    from objectCount in numbers
+                    from removeCount in Enumerable.Range(1, objectCount - 1)
+                    where objectCount % 2 == removeCount % 2
+                    select new
+                    {
+                        ObjectCount = objectCount,
+                        RemoveCount = removeCount
+                    }
+                ).ToList();
+
+                string keyPrefix =
+                    $"{code}:L{levelId}:D{actualDifficulty}";
+
+                var selected = GetUnusedCandidate(candidates,keyPrefix,x => $"{x.ObjectCount}:{x.RemoveCount}",usedGameCombinations);
+                var distractors = Enumerable.Range(
+                        1,
+                        selected.ObjectCount - 1)
+                    .Where(x =>
+                        x % 2 != selected.ObjectCount % 2)
+                    .Distinct()
+                    .OrderBy(_ => _random.Next())
+                    .Take(3)
+                    .ToList();
+
+                if (distractors.Count < 3)
+                    throw new InvalidOperationException(
+                        "Unable to generate three distinct incorrect options.");
+
+                var options = new List<int>
+        {
+            selected.RemoveCount
+        };
+
+                options.AddRange(distractors);
+
+                options = options
+                    .OrderBy(_ => _random.Next())
+                    .ToList();
+
+                string questionText =
+                    $"A basket contains {selected.ObjectCount} apples. " +
+                    "How many apples should be removed so that an even " +
+                    "number of apples remains?";
+
+                var data = new
+                {
+                    renderKey = "OddEvenObjectWithParityOfMystery",
+                    questionType = code,
+                    title = "Object Removal Challenge",
+                    questionText,
+
+                    objectName = "apples",
+                    objectIcon = "🍎",
+
+                    objectCount = selected.ObjectCount,
+                    targetParity = "Even",
+
+                    options = options.ToArray(),
+                    answerMode = "choice",
+                    answerType = "number"
+                };
+
+                return CreateQuestion(questionNumber,questionTypeId,questionText,data,selected.RemoveCount.ToString());
+            }
+
+            if (code == "ODD_EVEN_HIDDEN_OBJECT_PARITY")
+            {
+                DifficultyRange range = GetDifficultyRange(OddEvenDifficultyConfig.HiddenObjectParityByLevel,levelId,actualDifficulty);
+
+                var candidates = (
+                    from totalCount in Enumerable.Range(
+                        range.Min,
+                        range.Max - range.Min + 1)
+
+                    from visibleCount in Enumerable.Range(
+                        1,
+                        totalCount - 1)
+
+                    select new
+                    {
+                        TotalCount = totalCount,
+                        VisibleCount = visibleCount,
+                        HiddenParity =
+                            (totalCount - visibleCount) % 2 == 0
+                                ? "Even"
+                                : "Odd"
+                    }
+                ).ToList();
+
+                string keyPrefix =
+                    $"{code}:L{levelId}:D{actualDifficulty}";
+
+                var selected = GetUnusedCandidate(
+                    candidates,
+                    keyPrefix,
+                    x => $"{x.TotalCount}:{x.VisibleCount}",
+                    usedGameCombinations);
+
+                string questionText =
+                    $"There are {selected.TotalCount} counters altogether. " +
+                    $"{selected.VisibleCount} counters are visible, and " +
+                    "the rest are hidden. Are the hidden counters odd " +
+                    "or even in number?";
+
+                var data = new
+                {
+                    renderKey = "OddEvenObjectWithParityOfMystery",
+                    questionType = code,
+                    title = "Hidden Object Parity",
+                    questionText,
+
+                    objectName = "counters",
+                    objectIcon = "🔵",
+
+                    totalCount = selected.TotalCount,
+                    visibleCount = selected.VisibleCount,
+
+                    options = new[] { "Odd", "Even" },
+                    answerMode = "choice",
+                    answerType = "parity"
+                };
+
+                return CreateQuestion(questionNumber,questionTypeId,questionText,data,selected.HiddenParity);
+            }
+
+            throw new ArgumentException(
+                $"Unsupported Odd/Even object question code: {code}",
+                nameof(code));
         }
     }
 }

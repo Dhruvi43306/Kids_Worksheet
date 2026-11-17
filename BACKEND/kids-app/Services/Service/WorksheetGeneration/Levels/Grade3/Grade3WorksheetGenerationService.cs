@@ -1,12 +1,7 @@
-using kids_app.Dto.Addition;
-using kids_app.Dto.GenratedWorkSheet;
+
 using kids_app.Models;
-using kids_app.Services.Configurations;
-using kids_app.Services.Configurations.Addition;
-using Microsoft.Extensions.Options;
-using Org.BouncyCastle.Asn1.Cmp;
-using System.Configuration;
-using System.Text.Json;
+using kids_app.Services.Shared;
+
 
 namespace kids_app.Services
 {
@@ -35,42 +30,18 @@ namespace kids_app.Services
             {
                 return code switch
                 {
-                    "IDENTIFY" =>
-                        GenerateIdentifyOddEven(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, visualStyleName, usedGameCombinations),
+                    "ODD_EVEN_GRID_PATH_LENGTH" or "ODD_EVEN_DIGIT_PRODUCT_PARITY" or "ODD_EVEN_AREA_TILE_PARITY" or "ODD_EVEN_DOUBLE_MINUS_ONE" =>
+                        GenerateOddEvenGridParity(questionNumber,questionType.QuestionTypeId,questionType.Code ?? string.Empty,levelId,difficultyId,usedGameCombinations),
 
-                    "CIRCLE_ODD" =>
-                        GenerateCircleOdd(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedNumbers),
+                    "ODD_EVEN_TRIANGULAR_DOT_PARITY" or "ODD_EVEN_TOURNAMENT_BYE" or "ODD_EVEN_REPEATED_PATTERN_PARITY" or "ODD_EVEN_THREED_SHAPE_EDGE_PARITY" =>
+                        GenerateOddEvenMultiplePattern(questionNumber,questionType.QuestionTypeId,questionType.Code ?? string.Empty,levelId,difficultyId,usedGameCombinations),
 
-                    "CIRCLE_EVEN" =>
-                        GenerateCircleEven(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedNumbers),
-
-                    "TRUE_FALSE" =>
-                        GenerateTrueFalse(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedNumbers),
-
-                    "OBJECT_COUNT" =>
-                        GenerateCountObjects(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, visualIcons),
-
-                    "MATCH_ODD_EVEN" =>
-                        GenerateMatchOddEven(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedNumbers),
-
-                    "SORTING" =>
-                        GenerateSorting(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedNumbers),
-
-                    "SORT_ODD_EVEN" =>
-                        GenerateSorting(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedNumbers),
-
-                    "PATTERN" =>
-                        GeneratePattern(questionNumber, questionType.QuestionTypeId, difficultyId, visualStyleName, visualIcons),
-
-                    "ODD_EVEN_PATTERNS" =>
-                        GeneratePattern(questionNumber, questionType.QuestionTypeId, difficultyId, visualStyleName, visualIcons),
-
-                    "MISSING_NUMBER" =>
-                        GenerateMissingNumber(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedNumbers),
-
-                    "REASONING" =>
-                        GenerateReasoning(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedNumbers),
-
+                    "ODD_EVEN_RECTANGLE_PERIMETER_REASONING" or "ODD_EVEN_DOMINO_BOARD_COVERABILITY" or "ODD_EVEN_HANDSHAKE_COUNT" or "ODD_EVEN_PRIME_EXCEPTION" =>
+                          GenerateOddEvenParityPuzzleBoard(questionNumber,questionType.QuestionTypeId,questionType.Code ?? string.Empty,levelId,difficultyId,usedGameCombinations),
+                    "ODD_EVEN_PAIRING_REMAINDER" or "ODD_EVEN_COUNT_SET" or "ODD_EVEN_SUM_PARITY" =>     
+                        OddEvenQuestionGenerator.Generate(questionNumber,questionType.QuestionTypeId,code,levelId,difficultyId,visualIcons,usedGameCombinations),
+                    "ODD_EVEN_LIGHT_TOGGLE_STATE" or "ODD_EVEN_ELEVATOR_FLOOR_PARITY" or "ODD_EVEN_TOY_COPY_MACHINE" =>
+                            GenerateOddEvenContextQuestion(questionNumber,questionType.QuestionTypeId,questionType.Code ?? string.Empty,levelId,difficultyId,usedGameCombinations),
                     "HOW_MANY_ALTOGETHER" =>
                         GenerateHowManyAltogether(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, visualIcons),
 

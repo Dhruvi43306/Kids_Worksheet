@@ -1,424 +1,583 @@
 using kids_app.Dto.GenratedWorkSheet;
 using kids_app.Models;
 using kids_app.Services.Configurations.Addition;
-
+using kids_app.Services.Configurations.OddEven;
+using Org.BouncyCastle.Asn1.X500;
 using System.Text.Json;
 
 namespace kids_app.Services
 {
     public partial class Grade1WorksheetGenerationService
     {
-        private GeneratedQuestion GenerateIdentifyOddEven(int questionNumber, int questionTypeId, int levelId, int difficultyId, string? visualStyleName, HashSet<string> usedGameCombinations)
+
+        private GeneratedQuestion GenerateOddEvenParityOrPair(int questionNumber,int questionTypeId,string code,int levelId,int difficultyId,List<string> visualIcons,HashSet<string> usedGameCombinations)
         {
             if (usedGameCombinations == null)
             {
                 throw new ArgumentNullException(nameof(usedGameCombinations));
             }
-            var actualDifficulty = ResolveDifficulty(difficultyId);
-            var range = GetDifficultyRange(AdditionDifficultyConfig.ByGrade, levelId, actualDifficulty);
-            if (range.Min > range.Max)
-            {
-                throw new InvalidOperationException(
-                    $"Invalid range {range.Min}-{range.Max} " +
-                    $"for level {levelId}, difficulty {actualDifficulty}.");
-            }
-            var numbers = Enumerable.Range(range.Min, range.Max - range.Min + 1);
 
-            int number = GetUnusedCandidate(numbers, "IDENTIFY_ODD_EVEN", number => number.ToString(), usedGameCombinations);
+            code = (code ?? string.Empty).Trim().ToUpperInvariant();
 
+            int actualDifficulty = ResolveDifficulty(difficultyId);
 
-            string answer = number % 2 == 0 ? "Even" : "Odd";
-
-            var data = new
-            {
-                questionType = "identifyOddEven",
-                number,
-                visualStyle = visualStyleName,
-                options = new[]
-               {
-                    "Odd",
-                    "Even"
-                },
-
-                selectionMode = "single"
-            };
-
-            return CreateQuestion(questionNumber, questionTypeId, "Look at the number. Is it odd or even?", data, answer);
-        }
-        private GeneratedQuestion GenerateCircleOdd(int questionNumber, int questionTypeId, int levelId, int difficultyId, HashSet<int> usedNumbers)
-        {
-            var actualDifficulty = ResolveDifficulty(difficultyId);
-            var range = GetDifficultyRange(AdditionDifficultyConfig.ByGrade, levelId, actualDifficulty);
-            const int count = 4;
-            var numbers = GenerateNumbersWithRequiredParity(range.Min, range.Max, requireOdd: true, count, usedNumbers);
-            int correct = numbers.First(x => x % 2 != 0);
-            var data = new
-            {
-                questionType = "circleOdd",
-                numbers,
-                selectionMode = "single"
-            };
-
-            return CreateQuestion(questionNumber, questionTypeId, "Circle an odd number.", data, correct.ToString());
-        }
-        private GeneratedQuestion GenerateCircleEven(int questionNumber, int questionTypeId, int levelId, int difficultyId, HashSet<int> usedNumbers)
-        {
-            var actualDifficulty = ResolveDifficulty(difficultyId);
-            var range = GetDifficultyRange(AdditionDifficultyConfig.ByGrade, levelId, actualDifficulty);
-
-            const int count = 4;
-
-            var numbers = GenerateNumbersWithRequiredParity(range.Min, range.Max, requireOdd: false, count, usedNumbers);
-
-            int correct = numbers.First(x => x % 2 == 0);
-
-            var data = new
-            {
-                questionType = "circleEven",
-                numbers,
-                selectionMode = "single"
-            };
-
-            return CreateQuestion(questionNumber, questionTypeId, "Circle an even number.", data, correct.ToString());
-        }
-        private GeneratedQuestion GenerateTrueFalse(int questionNumber, int questionTypeId, int levelId, int difficultyId, HashSet<int> usedNumbers)
-        {
-            var actualDifficulty = ResolveDifficulty(difficultyId);
-            var range = GetDifficultyRange(AdditionDifficultyConfig.ByGrade, levelId, actualDifficulty);
-            int number = GetUniqueNumber(range.Max, usedNumbers);
-
-            bool numberIsEven = number % 2 == 0;
-
-            bool statementIsEven = _random.Next(2) == 0;
-
-            string statement = statementIsEven ? $"{number} is an even number." : $"{number} is an odd number.";
-
-            bool correct = statementIsEven ? numberIsEven : !numberIsEven;
-
-            var data = new
-            {
-                questionType = "trueFalse",
-
-                number,
-
-                statement,
-
-                options = new[]
-                {
-                    "True",
-                    "False"
-                },
-
-                selectionMode = "single"
-            };
-
-            return CreateQuestion(questionNumber, questionTypeId, "Is the statement true or false?", data, correct ? "True" : "False");
-        }
-        private GeneratedQuestion GenerateCountObjects(int questionNumber, int questionTypeId, int levelId, int difficultyId, List<string> visualIcons)
-        {
-            var actualDifficulty = ResolveDifficulty(difficultyId);
-            var range = GetDifficultyRange(AdditionDifficultyConfig.ByGrade, levelId, actualDifficulty);
-            int count = _random.Next(range.Min, range.Max + 1);
-            string answer = count % 2 == 0 ? "Even" : "Odd";
-            string icon = GetDatabaseVisualIcon(visualIcons, questionNumber);
-            var icons = Enumerable.Repeat(icon, count).ToList();
-            var data = new
-            {
-                questionType = "countObjects",
-                count,
-                icon,
-                icons,
-                options = new[]
-                {
-                    "Odd",
-                    "Even"
-                },
-
-                selectionMode = "single"
-            };
-
-            return CreateQuestion(questionNumber, questionTypeId, "Count the objects. Is the number odd or even?", data, answer);
-        }
-        private GeneratedQuestion GenerateMatchOddEven(int questionNumber, int questionTypeId, int levelId, int difficultyId, HashSet<int> usedNumbers)
-        {
-            var actualDifficulty = ResolveDifficulty(difficultyId);
-            var range = GetDifficultyRange(AdditionDifficultyConfig.ByGrade, levelId, actualDifficulty);
-            const int count = 3; //meaning of const int
-            var allNumbers = Enumerable.Range(range.Min, range.Max - range.Min + 1).ToList();
-
-            var availableOddNumbers = Enumerable
-              .Range(range.Min, range.Max - range.Min + 1)
-              .Where(number => number % 2 != 0 && !usedNumbers.Contains(number))
-              .ToList();
-
-            var availableEvenNumbers =
-                Enumerable
-                    .Range(range.Min, range.Max - range.Min + 1)
-                    .Where(number => number % 2 == 0 && !usedNumbers.Contains(number))
-                    .ToList();
-            if (availableOddNumbers.Count < count)
-            {
-                throw new InvalidOperationException(
-                    $"Not enough unused odd numbers are available " +
-                    $"for range {range.Min}-{range.Max}. " +
-                    $"Required: {count}, Available: {availableOddNumbers.Count}.");
-            }
-
-            if (availableEvenNumbers.Count < count)
-            {
-                throw new InvalidOperationException(
-                    $"Not enough unused even numbers are available " +
-                    $"for range {range.Min}-{range.Max}. " +
-                    $"Required: {count}, Available: {availableEvenNumbers.Count}.");
-            }
-
-
-            Shuffle(availableOddNumbers);
-            Shuffle(availableEvenNumbers);
-            var oddNumbers = availableOddNumbers.Take(count).ToList();
-
-            var evenNumbers = availableEvenNumbers.Take(count).ToList();
-
-
-            var pairs = oddNumbers.Select(number => new NumberAnswerDto
-            {
-                Number = number,
-                Answer = "Odd"
-            })
-                .Concat(evenNumbers.Select(number => new NumberAnswerDto
-                {
-                    Number = number,
-                    Answer = "Even"
-                }))
+            var icons = (visualIcons ?? new List<string>())
+                .Where(icon => !string.IsNullOrWhiteSpace(icon))
+                .Distinct()
                 .ToList();
 
-            Shuffle(pairs);
-            var answers = pairs.ToDictionary(item => item.Number.ToString(),
-                                            item => item.Answer);
-            var data = new
+            string keyPrefix =
+                $"{code}:L{levelId}:D{actualDifficulty}";
+
+            switch (code)
             {
-                questionType = "matchOddEven",
-                pairs,
-                options = new[]
-                {
-                    "Odd",
-                    "Even"
-                },
 
-                selectionMode = "single"
-            };
+                case "ODD_EVEN_PAIRING_REMAINDER":
+                    {
+                        var range = GetDifficultyRange(OddEvenDifficultyConfig.PairingRemainderByLevel,levelId,actualDifficulty);
 
-            return CreateQuestion(questionNumber, questionTypeId, "Match each number with Odd or Even.", data, JsonSerializer.Serialize(answers));
+                        int minimumTotal = Math.Max(2, range.Min);
+
+                        if (minimumTotal > range.Max)
+                        {
+                            throw new InvalidOperationException(
+                                $"Invalid pairing range {range.Min}-{range.Max} " +
+                                $"for level {levelId}, difficulty {actualDifficulty}.");
+                        }
+
+                        var candidates = Enumerable
+                            .Range(minimumTotal, range.Max - minimumTotal + 1)
+                            .Select(total => new
+                            {
+                                Total = total,
+                                PairCount = total / 2,
+                                Remainder = total % 2
+                            })
+                            .ToList();
+
+                        var selected = GetUnusedCandidate(
+                            candidates,
+                            keyPrefix,
+                            x => x.Total.ToString(),
+                            usedGameCombinations);
+
+                        string? selectedIcon = icons.Count > 0
+                            ? icons[_random.Next(icons.Count)]
+                            : null;
+
+                        var counters = Enumerable
+                            .Range(1, selected.Total)
+                            .Select(index => new
+                            {
+                                id = $"COUNTER_{index}",
+                                icon = selectedIcon
+                            })
+                            .ToArray();
+
+                        var pairs = Enumerable
+                            .Range(0, selected.PairCount)
+                            .Select(pairIndex => new
+                            {
+                                id = $"PAIR_{pairIndex + 1}",
+                                objects = counters
+                                    .Skip(pairIndex * 2)
+                                    .Take(2)
+                                    .ToArray()
+                            })
+                            .ToArray();
+
+                        var unpairedObjects = counters
+                            .Skip(selected.PairCount * 2)
+                            .ToArray();
+
+                        string questionText =
+                            $"There are {selected.Total} counters. " +
+                            "Make pairs of two. How many counters remain unpaired?";
+
+                        var data = new
+                        {
+                            renderKey = "OddEvenParityorPair",
+                            questionType = code,
+                            title = "Pair Numbers and Find Leftovers",
+
+                            totalItems = selected.Total,
+                            pairSize = 2,
+                            pairCount = selected.PairCount,
+                            remainder = selected.Remainder,
+
+                            counters,
+                            pairs,
+                            unpairedObjects,
+
+                            answerMode = "input",
+                            answerType = "number"
+                        };
+
+                        return CreateQuestion(questionNumber,questionTypeId,questionText,data,selected.Remainder.ToString());
+                    }
+
+
+                case "ODD_EVEN_COUNT_SET":
+                    {
+                        var range = GetDifficultyRange(OddEvenDifficultyConfig.CountSetByLevel,levelId,actualDifficulty);
+
+                        const int setSize = 6;
+                        const int maxAttempts = 5000;
+
+                        int availableCount = range.Max - range.Min + 1;
+
+                        if (availableCount < setSize)
+                        {
+                            throw new InvalidOperationException(
+                                $"The count-set range {range.Min}-{range.Max} " +
+                                $"does not contain enough distinct numbers.");
+                        }
+
+                        int[] selectedNumbers = Array.Empty<int>();
+                        bool generated = false;
+
+                        for (int attempt = 0; attempt < maxAttempts; attempt++)
+                        {
+                            var chosenNumbers = new HashSet<int>();
+
+                            while (chosenNumbers.Count < setSize)
+                            {
+                                chosenNumbers.Add(
+                                    _random.Next(range.Min, range.Max + 1));
+                            }
+
+                            var numbers = chosenNumbers
+                                .OrderBy(number => number)
+                                .ToArray();
+                            bool containsOdd = numbers.Any(number => number % 2 != 0);
+                            bool containsEven = numbers.Any(number => number % 2 == 0);
+
+                            if (!containsOdd || !containsEven)
+                            {
+                                continue;
+                            }
+
+                            string uniqueKey =
+                                $"{keyPrefix}:{string.Join("-", numbers)}";
+
+                            if (!usedGameCombinations.Add(uniqueKey))
+                            {
+                                continue;
+                            }
+
+                            selectedNumbers = numbers;
+                            generated = true;
+                            break;
+                        }
+
+                        if (!generated)
+                        {
+                            throw new InvalidOperationException(
+                                $"Could not generate a unique odd/even number set " +
+                                $"for level {levelId}, difficulty {actualDifficulty}.");
+                        }
+
+                        int oddCount = selectedNumbers.Count(number => number % 2 != 0);
+                        int evenCount = selectedNumbers.Count(number => number % 2 == 0);
+
+                        var oddNumbers = selectedNumbers
+                            .Where(number => number % 2 != 0)
+                            .ToArray();
+
+                        var evenNumbers = selectedNumbers
+                            .Where(number => number % 2 == 0)
+                            .ToArray();
+
+                        string questionText =
+                            $"Count the odd and even numbers in this set: " +
+                            $"{string.Join(", ", selectedNumbers)}. " +
+                            "How many are odd, and how many are even?";
+
+                        var data = new
+                        {
+                            renderKey = "OddEvenParityorPair",
+                            questionType = code,
+                            title = "Count Odd and Even Numbers",
+
+                            numbers = selectedNumbers,
+                            numberCount = setSize,
+
+                            oddNumbers,
+                            evenNumbers,
+                            oddCount,
+                            evenCount,
+
+                            answerMode = "two-inputs",
+                            answerType = "odd-even-counts"
+                        };
+
+                        string answer = System.Text.Json.JsonSerializer.Serialize(
+                            new
+                            {
+                                odd = oddCount,
+                                even = evenCount
+                            });
+
+                        return CreateQuestion(questionNumber,questionTypeId,questionText,data,answer);
+                    }
+
+                case "ODD_EVEN_SUM_PARITY":
+                    {
+                        var range = GetDifficultyRange(OddEvenDifficultyConfig.SumParityByLevel,levelId,actualDifficulty);
+
+                        if (range.Min < 1 || range.Max < range.Min)
+                        {
+                            throw new InvalidOperationException(
+                                $"Invalid sum-parity range {range.Min}-{range.Max}.");
+                        }
+
+                        var candidates = (
+                            from firstNumber in Enumerable.Range(range.Min,range.Max - range.Min + 1)
+                            from secondNumber in Enumerable.Range(range.Min,range.Max - range.Min + 1)
+                            where firstNumber <= secondNumber
+
+                            let sum = firstNumber + secondNumber
+
+                            select new
+                            {
+                                FirstNumber = firstNumber,
+                                SecondNumber = secondNumber,
+                                Sum = sum,
+                                Parity = sum % 2 == 0 ? "Even" : "Odd"
+                            }
+                        ).ToList();
+
+                        var selected = GetUnusedCandidate(
+                            candidates,
+                            keyPrefix,
+                            x => $"{x.FirstNumber}:{x.SecondNumber}",
+                            usedGameCombinations);
+
+                        string questionText =
+                            $"Predict whether the sum of {selected.FirstNumber} " +
+                            $"and {selected.SecondNumber} is odd or even.";
+
+                        var data = new
+                        {
+                            renderKey = "OddEvenParityorPair",
+                            questionType = code,
+                            title = "Predict the Sum's Parity",
+
+                            firstNumber = selected.FirstNumber,
+                            secondNumber = selected.SecondNumber,
+
+                            equation =
+                                $"{selected.FirstNumber} + " +
+                                $"{selected.SecondNumber} = ?",
+
+                            options = new[] { "Odd", "Even" },
+
+                            answerMode = "choice",
+                            answerType = "parity"
+                        };
+
+                        return CreateQuestion(questionNumber,questionTypeId,questionText,data,selected.Parity);
+                    }
+
+                default:
+                    throw new ArgumentException(
+                        $"Unsupported advanced odd/even question type: {code}",
+                        nameof(code));
+            }
         }
-        private GeneratedQuestion GenerateSorting(int questionNumber, int questionTypeId, int levelId, int difficultyId, HashSet<int> usedNumbers)
+
+        private GeneratedQuestion GenerateOddEvenPredictOne(int questionNumber,int questionTypeId,string code,int levelId,int difficultyId,HashSet<string> usedGameCombinations)
         {
-            if (usedNumbers == null)
+            if (usedGameCombinations == null)
             {
-                throw new ArgumentNullException(nameof(usedNumbers));
+                throw new ArgumentNullException(nameof(usedGameCombinations));
+            }
+
+            code = (code ?? string.Empty).Trim().ToUpperInvariant();
+
+            if (code != "ADD_ONE" && code != "SUBTRACT_ONE")
+            {
+                throw new ArgumentException(
+                    $"Unsupported odd-even prediction question type: {code}",
+                    nameof(code));
+            }
+
+            if (levelId != 2)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(levelId),
+                    levelId,
+                    "Odd-even prediction supports only Learning Level ID 2.");
             }
 
             int actualDifficulty = ResolveDifficulty(difficultyId);
 
-            var range = GetDifficultyRange(AdditionDifficultyConfig.ByGrade, levelId, actualDifficulty);
+            DifficultyRange range = GetDifficultyRange(
+                OddEvenDifficultyConfig.StartingNumberByLevel,
+                levelId,
+                actualDifficulty);
 
-            if (range.Min > range.Max)
-            {
-                throw new InvalidOperationException(
-                    $"Invalid sorting range {range.Min}-{range.Max} " +
-                    $"for level {levelId}, difficulty {actualDifficulty}.");
-            }
+            // The question type determines the operation.
+            bool isAddition = code == "ADD_ONE";
 
-            int numberCount =
-                actualDifficulty switch
+            string operation = code;
+            string symbol = isAddition ? "+" : "-";
+            string operationLabel = isAddition ? "Add One" : "Subtract One";
+
+            var candidates = Enumerable
+                .Range(range.Min, range.Max - range.Min + 1)
+                .Select(number =>
                 {
-                    1 => 4,
-                    2 => 5,
-                    3 => 6,
-                    _ => 6
+                    int result = isAddition ? number + 1 : number - 1;
+
+                    return new
+                    {
+                        StartingNumber = number,
+                        Result = result,
+                        Parity = result % 2 == 0 ? "Even" : "Odd"
+                    };
+                })
+                .Where(x => x.Result >= 0)
+                .ToList();
+
+            string keyPrefix =
+                $"ODD_EVEN_{operation}:L{levelId}:D{actualDifficulty}";
+
+            var selected = GetUnusedCandidate(
+                candidates,
+                keyPrefix,
+                x => x.StartingNumber.ToString(),
+                usedGameCombinations);
+
+            string questionText = isAddition
+                ? $"Add one: {selected.StartingNumber} + 1 = " +
+                  $"{selected.Result}. Is {selected.Result} odd or even?"
+                : $"Subtract one: {selected.StartingNumber} - 1 = " +
+                  $"{selected.Result}. Is {selected.Result} odd or even?";
+
+            var data = new
+            {
+                renderKey = "PredictTheOddEvenChange",
+                questionType = code,
+                title = "One More or One Less",
+
+                operation,
+                operationLabel,
+
+                startingNumber = selected.StartingNumber,
+                changeBy = 1,
+                result = selected.Result,
+
+                equation =
+                    $"{selected.StartingNumber} {symbol} 1 = {selected.Result}",
+
+                options = new[] { "Odd", "Even" },
+
+                answerMode = "choice",
+                answerType = "parity"
+            };
+
+            return CreateQuestion(
+                questionNumber,
+                questionTypeId,
+                questionText,
+                data,
+                selected.Parity);
+        }
+
+        private GeneratedQuestion GenerateOddEvenNumerical(int questionNumber,int questionTypeId,string code,int levelId,int difficultyId,HashSet<string> usedGameCombinations)
+        {
+            if (usedGameCombinations == null)
+                throw new ArgumentNullException(nameof(usedGameCombinations));
+
+            code = (code ?? string.Empty).Trim().ToUpperInvariant();
+
+            if (levelId != 2)
+                throw new ArgumentOutOfRangeException(
+                    nameof(levelId),
+                    "Odd/Even question types support only Level 2.");
+
+            int actualDifficulty = ResolveDifficulty(difficultyId);
+
+            Dictionary<int, DifficultyRange[]> difficultyRanges = code switch
+            {
+                "ODD_EVEN_SUBTRACTION_PARITY" =>
+                    OddEvenDifficultyConfig.SubtractionParityByLevel,
+
+                "ODD_EVEN_MISSING_ADDEND_PARITY" =>
+                    OddEvenDifficultyConfig.MissingAddendParityByLevel,
+
+                "ODD_EVEN_COUNT_IN_RANGE" =>
+                    OddEvenDifficultyConfig.SubtractionParityByLevel,
+
+                _ => throw new ArgumentException(
+                    $"Unsupported Odd/Even question type: {code}")
+            };
+
+            DifficultyRange range = GetDifficultyRange(difficultyRanges,levelId,actualDifficulty);
+
+            if (code == "ODD_EVEN_SUBTRACTION_PARITY")
+            {
+                var candidates = (
+                    from minuend in Enumerable.Range(
+                        range.Min,
+                        range.Max - range.Min + 1)
+                    from subtrahend in Enumerable.Range(1, minuend - 1)
+                    let result = minuend - subtrahend
+                    select new
+                    {
+                        Minuend = minuend,
+                        Subtrahend = subtrahend,
+                        Parity = result % 2 == 0 ? "Even" : "Odd"
+                    }
+                ).ToList();
+
+                string keyPrefix =
+                    $"{code}:L{levelId}:D{actualDifficulty}";
+
+                var selected = GetUnusedCandidate(
+                    candidates,
+                    keyPrefix,
+                    x => $"{x.Minuend}-{x.Subtrahend}",
+                    usedGameCombinations);
+                string questionText = $"Is {selected.Minuend} - {selected.Subtrahend} odd or even?";
+
+                var data = new
+                {
+                    renderKey = "OddEvenNumerical",
+                    questionType = code,
+                    title = "Predict the Parity of a Difference",
+                    questionText = questionText,
+                    minuend = selected.Minuend,
+                    subtrahend = selected.Subtrahend,
+                    equation = $"{selected.Minuend} - {selected.Subtrahend} = ?",
+                    options = new[] { "Odd", "Even" },
+                    answerMode = "choice",
+                    answerType = "parity"
                 };
 
-            var availableNumbers = Enumerable.Range(range.Min, range.Max - range.Min + 1).Where(number => !usedNumbers.Contains(number)).ToList();
-
-            if (availableNumbers.Count < numberCount)
-            {
-                availableNumbers =
-                    Enumerable.Range(range.Min, range.Max - range.Min + 1).ToList();
+                return CreateQuestion(questionNumber,questionTypeId,questionText,data,selected.Parity);
             }
-
-            if (availableNumbers.Count < numberCount)
+            if (code == "ODD_EVEN_MISSING_ADDEND_PARITY")
             {
-                throw new InvalidOperationException(
-                    $"Not enough numbers are available for sorting " +
-                    $"in range {range.Min}-{range.Max}. " +
-                    $"Required: {numberCount}, " +
-                    $"Available: {availableNumbers.Count}.");
-            }
+                var numbers = Enumerable.Range(
+                    range.Min,
+                    range.Max - range.Min + 1).ToList();
 
-            Shuffle(availableNumbers);
+                var candidates = (
+                    from baseNumber in numbers
+                    from targetParity in new[] { "Odd", "Even" }
+                    from addend in numbers
+                    where ((baseNumber + addend) % 2 == 0
+                        ? "Even"
+                        : "Odd") == targetParity
+                    select new
+                    {
+                        BaseNumber = baseNumber,
+                        TargetParity = targetParity,
+                        CorrectAddend = addend
+                    }
+                ).ToList();
 
-            var numbers = availableNumbers.Take(numberCount).ToList();
+                string keyPrefix =
+                    $"{code}:L{levelId}:D{actualDifficulty}";
 
-            foreach (var number in numbers)
-            {
-                usedNumbers.Add(number);
-            }
+                var selected = GetUnusedCandidate(
+                    candidates,
+                    keyPrefix,
+                    x => $"{x.BaseNumber}:{x.TargetParity}:{x.CorrectAddend}",
+                    usedGameCombinations);
 
-            var answer = numbers.OrderBy(number => number).ToList();
+                var distractors = numbers
+                    .Where(x =>
+                        x % 2 != selected.CorrectAddend % 2)
+                    .Distinct()
+                    .OrderBy(_ => _random.Next())
+                    .Take(3)
+                    .ToList();
 
-            var data = new
-            {
-                questionType = "sorting",
-                numbers,
-                direction = "ascending",
-                options = new[]
-               {
-                   "Smallest to Largest"
-               },
-                selectionMode = "single",
-                answerType = "number-array"
-            };
+                if (distractors.Count < 3)
+                    throw new InvalidOperationException(
+                        "Unable to generate three distinct incorrect options.");
 
-            return CreateQuestion(questionNumber, questionTypeId, "Sort the numbers from smallest to largest.", data, JsonSerializer.Serialize(answer));
-        }
-        private GeneratedQuestion GeneratePattern(int questionNumber, int questionTypeId, int difficultyId, string? visualStyleName, List<string> visualIcons)
-        {
-            if (visualIcons.Count == 0 || visualIcons == null)
-            {
-                throw new ArgumentNullException(nameof(visualIcons));
-            }
-            List<string> icons = visualIcons.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct().ToList();
-            if (icons.Count < 2)
-            {
-                throw new InvalidOperationException(
-                    $"At least 2 unique VisualStyleItems are required " +
-                    $"for visual style '{visualStyleName}'.");
-            }
-            Shuffle(icons);
-            string firstIcon = icons[0];
-            string secondIcon = icons[1];
+                var options = new List<int> { selected.CorrectAddend };
+                options.AddRange(distractors);
 
-            var pattern = new List<string> { firstIcon, secondIcon, firstIcon, secondIcon, "?" };
-            var options = new List<string> { firstIcon, secondIcon };
-            var data = new
-            {
-                questionType = "pattern",
-
-                visualStyle = visualStyleName,
-                pattern,
-                icons = pattern,
-
-                missingIndex = 4,
-                options,
-                selectionMode = "single",
-                answertype = "option"
-            };
-
-            return CreateQuestion(questionNumber, questionTypeId, "Complete the pattern.", data, firstIcon);
-        }
-        private GeneratedQuestion GenerateMissingNumber(int questionNumber, int questionTypeId, int levelId, int difficultyId, HashSet<int> usedNumbers)
-        {
-            var range = GetDifficultyRange(AdditionDifficultyConfig.ByGrade, levelId, difficultyId); // why var not int
-            int step = _random.Next(1, 4);
-            int maxStart = range.Max - (4 * step);
-
-            if (maxStart < 1)
-            {
-                step = 1;
-                maxStart = range.Max - 4;
-            }
-
-            if (maxStart < 1)
-            {
-                throw new InvalidOperationException("Difficulty range is too small for a missing-number sequence.");
-            }
-
-            int start = _random.Next(1, maxStart + 1);
-
-            var sequence = Enumerable.Range(0, 5).Select(i => start + i * step).ToList();
-
-            int missingIndex = _random.Next(sequence.Count);
-
-            int answer = sequence[missingIndex];
-
-            sequence[missingIndex] = -1;
-
-            foreach (var number in sequence)
-            {
-                if (number > 0)
+                options = options
+                    .OrderBy(_ => _random.Next())
+                    .ToList();
+                string questionText = $"Choose the number that makes the sum " +
+                        $"{selected.TargetParity.ToLowerInvariant()}.";
+                var data = new
                 {
-                    usedNumbers.Add(number);
-                }
+                    renderKey = "OddEvenNumerical",
+                    questionType = code,
+                    title = "Choose a Number to Make the Sum Odd or Even",
+                    questionText = questionText,
+                       
+                    baseNumber = selected.BaseNumber,
+                    targetParity = selected.TargetParity,
+                    equation =
+                        $"{selected.BaseNumber} + ? = {selected.TargetParity.ToLowerInvariant()}",
+                    options = options.ToArray(),
+                    answerMode = "choice",
+                    answerType = "number"
+                };
+
+                return CreateQuestion(questionNumber,questionTypeId,questionText,data,selected.CorrectAddend.ToString());
             }
 
-
-            var options = new HashSet<int> { answer };
-            if (answer + step <= range.Max)
+            if (code == "ODD_EVEN_COUNT_IN_RANGE")
             {
-                options.Add(answer + step);
-            }
-            if (answer - step >= 1)
-            {
-                options.Add(answer - step);
-            }
-            if (answer + (2 * step) <= range.Max)
-            {
-                options.Add(answer + (2 * step));
-            }
-            int attempts = 0;
-            int maxAttempts = 100;
+                var numbers = Enumerable.Range(
+                    range.Min,
+                    range.Max - range.Min + 1).ToList();
 
-            while (options.Count < 4 && attempts < maxAttempts)
-            {
-                attempts++;
+                var candidates = (
+                    from startNumber in numbers
+                    from endNumber in numbers
+                    where endNumber - startNumber >= 6
+                    from parity in new[] { "Odd", "Even" }
+                    let count = Enumerable.Range(
+                            startNumber + 1,
+                            endNumber - startNumber - 1)
+                        .Count(number =>
+                            parity == "Even"
+                                ? number % 2 == 0
+                                : number % 2 != 0)
+                    select new
+                    {
+                        StartNumber = startNumber,
+                        EndNumber = endNumber,
+                        Parity = parity,
+                        Count = count
+                    }
+                ).ToList();
 
-                int candidate = _random.Next(1, range.Max + 1);
+                string keyPrefix = $"{code}:L{levelId}:D{actualDifficulty}";
 
-                if (!options.Contains(candidate))
+                var selected = GetUnusedCandidate(candidates,keyPrefix,x => $"{x.StartNumber}:{x.EndNumber}:{x.Parity}",usedGameCombinations);
+                string questionText = $"How many {selected.Parity.ToLowerInvariant()} numbers " +
+                        $"are strictly between {selected.StartNumber} " +
+                        $"and {selected.EndNumber}?";
+                var data = new
                 {
-                    options.Add(candidate);
-                }
+                    renderKey = "OddEvenNumerical",
+                    questionType = code,
+                    title = "Count Odd or Even Numbers in a Range",
+                    questionText = questionText,
+                    startNumber = selected.StartNumber,
+                    endNumber = selected.EndNumber,
+                    parityToCount = selected.Parity,
+                    answerMode = "number",
+                    answerType = "count"
+                };
+
+                return CreateQuestion(questionNumber,questionTypeId,questionText,data,selected.Count.ToString());
             }
-            var optionList = options.ToList();
 
-            Shuffle(optionList);
-
-            var data = new
-            {
-                questionType = "missingNumber",
-                numbers = sequence,
-                missingIndex,
-                options,
-                selectionMode = "single"
-            };
-
-            return CreateQuestion(questionNumber, questionTypeId, "Find the missing number.", data, answer.ToString());
-        }
-        private GeneratedQuestion GenerateReasoning(int questionNumber, int questionTypeId, int levelId, int difficultyId, HashSet<int> usedNumbers)
-        {
-            var actualDifficulty = ResolveDifficulty(difficultyId);
-            var range = GetDifficultyRange(AdditionDifficultyConfig.ByGrade, levelId, actualDifficulty);
-
-            int number = GetUniqueNumber(range.Max, usedNumbers);
-
-            bool canDivide = number % 2 == 0;
-
-            string questionText = $"Riya has {number} pencils. " + "Can she divide them equally into two groups?";
-
-            string answer = canDivide ? "Yes" : "No";
-
-            var data = new
-            {
-                questionType = "reasoning",
-                number,
-                options = new[]
-               {
-                   "Yes",
-                   "No"
-               },
-                selectionMode = "single"
-            };
-
-            return CreateQuestion(questionNumber, questionTypeId, questionText, data, answer);
+            throw new ArgumentException(
+                $"Unsupported Odd/Even question type: {code}");
         }
     }
 }

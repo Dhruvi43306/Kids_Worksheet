@@ -1,7 +1,9 @@
 using FluentValidation;
 using kids_app.Data;
+using kids_app.Interfaces;
 using kids_app.Services;
 using kids_app.Services.Interface;
+using kids_app.Services.PrintableWorksheet;
 using kids_app.Services.Service;
 using kids_app.Validators;
 using Microsoft.EntityFrameworkCore;
@@ -39,7 +41,6 @@ namespace kids_app
             builder.Services.AddScoped<IDifficultyService, DifficultyService>();
             builder.Services.AddScoped<ILearningLevel, LearningLevelService>();
             builder.Services.AddScoped<IQuestionTypeService, QuestionTypeService>();
-            builder.Services.AddScoped<IVisualStyleService, VisualStyleService>();
             builder.Services.AddScoped<ITopicLevelConfiguration, TopicLevelConfigService>();
             builder.Services.AddScoped<ITopicLevelDifficultyService,TopicLevelDifficultyService>();
             builder.Services.AddScoped<ITopicLevelVisualStyleService,TopicLevelVisualStyleService>();
@@ -47,7 +48,7 @@ namespace kids_app
             builder.Services.AddScoped<IQuestionCountOptionService, QuestionCountOptionService>();
             builder.Services.AddScoped<IGeneratedWorksheetService,GeneratedWorksheetService>();
             builder.Services.AddScoped<IWorksheetCategory, WorksheetCategoryService>();
-            // One shared generator contains every reusable question-generation function and case.
+            builder.Services.AddScoped<IPreGeneratedWorksheetService,PreGeneratedWorksheetService>();            
             builder.Services.AddScoped<WorksheetQuestionGenerator>();
 
 

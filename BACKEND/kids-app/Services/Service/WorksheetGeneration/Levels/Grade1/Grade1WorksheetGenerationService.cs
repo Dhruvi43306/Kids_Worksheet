@@ -35,41 +35,14 @@ namespace kids_app.Services
             {
                 return code switch
                 {
-                    "IDENTIFY" =>
-                        GenerateIdentifyOddEven(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, visualStyleName, usedGameCombinations),
+                    "ODD_EVEN_PAIRING_REMAINDER" or "ODD_EVEN_COUNT_SET" or "ODD_EVEN_SUM_PARITY" =>
+                        GenerateOddEvenParityOrPair(questionNumber,questionType.QuestionTypeId,questionType.Code ?? string.Empty,levelId,difficultyId,visualIcons,usedGameCombinations),
 
-                    "CIRCLE_ODD" =>
-                        GenerateCircleOdd(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedNumbers),
+                    "ADD_ONE" or "SUBTRACT_ONE" =>
+                        GenerateOddEvenPredictOne(questionNumber, questionType.QuestionTypeId, questionType.Code ?? string.Empty, levelId, difficultyId, usedGameCombinations),
 
-                    "CIRCLE_EVEN" =>
-                        GenerateCircleEven(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedNumbers),
-
-                    "TRUE_FALSE" =>
-                        GenerateTrueFalse(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedNumbers),
-
-                    "OBJECT_COUNT" =>
-                        GenerateCountObjects(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, visualIcons),
-
-                    "MATCH_ODD_EVEN" =>
-                        GenerateMatchOddEven(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedNumbers),
-
-                    "SORTING" =>
-                        GenerateSorting(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedNumbers),
-
-                    "SORT_ODD_EVEN" =>
-                        GenerateSorting(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedNumbers),
-
-                    "PATTERN" =>
-                        GeneratePattern(questionNumber, questionType.QuestionTypeId, difficultyId, visualStyleName, visualIcons),
-
-                    "ODD_EVEN_PATTERNS" =>
-                        GeneratePattern(questionNumber, questionType.QuestionTypeId, difficultyId, visualStyleName, visualIcons),
-
-                    "MISSING_NUMBER" =>
-                        GenerateMissingNumber(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedNumbers),
-
-                    "REASONING" =>
-                        GenerateReasoning(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedNumbers),
+                    "ODD_EVEN_SUBTRACTION_PARITY" or "ODD_EVEN_MISSING_ADDEND_PARITY" or "ODD_EVEN_COUNT_IN_RANGE" =>
+                        GenerateOddEvenNumerical(questionNumber,questionType.QuestionTypeId,questionType.Code ?? string.Empty,levelId,difficultyId,usedGameCombinations),
 
                     "HOW_MANY_ALTOGETHER" =>
                         GenerateHowManyAltogether(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, visualIcons),
