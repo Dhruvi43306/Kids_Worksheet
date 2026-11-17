@@ -1,0 +1,1050 @@
+/* ============================================================
+   MAGICAL UNICORN PENCIL ANIMATION (Side-docked & Scroll Tracked)
+   Sits at the upper-side, glides along the side margin,
+   never obstructing the page content or text in the center.
+   ============================================================ */
+
+.ls-unicorn-pencil-viewport {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 95;
+  overflow: hidden;
+}
+
+.ls-unicorn-stars-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ls-unicorn-star-particle {
+  position: fixed;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: starSparklePop 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+@keyframes starSparklePop {
+  0% {
+    transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
+    opacity: 0;
+  }
+  25% {
+    transform: translate(calc(-50% + var(--vx) * 0.4), calc(-50% + var(--vy) * 0.4)) scale(1.3) rotate(calc(var(--rot) * 0.5));
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--vx)), calc(-50% + var(--vy) + 24px)) scale(0) rotate(var(--rot));
+    opacity: 0;
+  }
+}
+
+.ls-unicorn-pencil-tracker {
+  position: fixed;
+  pointer-events: auto;
+  z-index: 99;
+  width: 82px;
+  height: 82px;
+  transition: left 0.35s cubic-bezier(0.2, 0.8, 0.3, 1), top 0.35s cubic-bezier(0.2, 0.8, 0.3, 1);
+  will-change: left, top, transform;
+}
+
+.ls-unicorn-pencil-tracker--flying {
+  filter: drop-shadow(0 6px 14px rgba(52, 120, 232, 0.25));
+}
+
+.ls-unicorn-pencil-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  animation: unicornSideBob 2.8s ease-in-out infinite;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ls-unicorn-pencil-btn:hover {
+  transform: scale(1.12);
+}
+
+.ls-unicorn-pencil-btn--spin {
+  animation: unicornSideSpin 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+@keyframes unicornSideBob {
+  0%, 100% {
+    transform: translateY(0px) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+}
+
+@keyframes unicornSideSpin {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.3); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+.ls-unicorn-halo {
+  position: absolute;
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(254, 240, 138, 0.45) 0%, rgba(244, 114, 182, 0.2) 45%, rgba(56, 189, 248, 0) 75%);
+  animation: haloPulseSide 2s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes haloPulseSide {
+  0% { transform: scale(0.9); opacity: 0.5; }
+  100% { transform: scale(1.2); opacity: 0.9; }
+}
+
+.ls-unicorn-svg {
+  width: 78px;
+  height: 78px;
+  display: block;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.12));
+}
+
+.ls-unicorn-wing {
+  transform-origin: 38px 48px;
+  animation: unicornWingFlapSide 1.3s ease-in-out infinite alternate;
+}
+
+.ls-unicorn-wing--back {
+  animation-delay: 0.2s;
+}
+
+@keyframes unicornWingFlapSide {
+  0% { transform: rotate(-12deg); }
+  100% { transform: rotate(14deg) scaleY(0.95); }
+}
+
+.ls-unicorn-speech-bubble {
+  position: absolute;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #FFFFFF;
+  color: #1E293B;
+  font-family: var(--ls-font-display, "Nunito", sans-serif);
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(32, 54, 83, 0.14), 0 0 0 2px #E0E7FF;
+  pointer-events: none;
+  animation: bubblePopSide 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.ls-unicorn-speech-bubble::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px 6px 0;
+  border-style: solid;
+  border-color: #FFFFFF transparent transparent;
+}
+
+@keyframes bubblePopSide {
+  0% { transform: translateY(-50%) scale(0.8); opacity: 0; }
+  100% { transform: translateY(-50%) scale(1); opacity: 1; }
+}
+
+/* Hide on very narrow mobile screens to avoid any tap overlap */
+@media (max-width: 600px) {
+  .ls-unicorn-pencil-tracker {
+    right: 8px !important;
+    width: 58px;
+    height: 58px;
+  }
+  .ls-unicorn-svg {
+    width: 54px;
+    height: 54px;
+  }
+  .ls-unicorn-speech-bubble--side {
+    display: none;
+  }
+}
+
+/* ============================================================
+   HERO CARD: WIDE AUTOPLAY MUTED VIDEO & AUTOMATIC IMAGE SWITCH
+   ============================================================ */
+
+.ls-hero-box-media-wrapper {
+  position: relative;
+  width: 100%;
+  min-height: 380px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #0F172A;
+  box-shadow: 0 8px 24px rgba(32, 54, 83, 0.08);
+}
+
+/* Video Stage - increased width, responsive, full presence */
+.ls-hero-box-video-stage {
+  position: relative;
+  width: 100%;
+  height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000000;
+  cursor: pointer;
+}
+
+.ls-hero-box-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Image Stage - shown when video stops or toggled */
+.ls-hero-box-image-stage {
+  position: relative;
+  width: 100%;
+  height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1E1B4B 0%, #312E81 100%);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.ls-hero-box-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.ls-hero-box-image-stage:hover .ls-hero-box-img {
+  transform: scale(1.02);
+}
+
+/* Top Badge Overlay */
+.ls-hero-box-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #FEF08A;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  z-index: 3;
+}
+
+.ls-hero-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 8px #10B981;
+  animation: heroDotPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes heroDotPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Floating Action Button (e.g. Switch to Image / Replay Video) */
+.ls-hero-box-action-overlay {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ls-hero-action-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  color: #1E293B;
+  font-family: var(--ls-font-display, "Nunito", sans-serif);
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 7px 14px;
+  border-radius: 9999px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ls-hero-action-pill-btn:hover {
+  background: #FFFFFF;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.ls-hero-action-pill-btn--primary {
+  background: #3478E8;
+  color: #FFFFFF;
+  border-color: #2563EB;
+}
+
+.ls-hero-action-pill-btn--primary:hover {
+  background: #2563EB;
+  color: #FFFFFF;
+}
+
+/* Center Replay Button on Image */
+.ls-hero-center-replay-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(52, 120, 232, 0.92);
+  backdrop-filter: blur(8px);
+  border: 3px solid #FFFFFF;
+  border-radius: 9999px;
+  color: #FFFFFF;
+  padding: 12px 22px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--ls-font-display, "Nunito", sans-serif);
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
+  z-index: 4;
+}
+
+.ls-hero-center-replay-btn:hover {
+  transform: translate(-50%, -50%) scale(1.08);
+  background: #2563EB;
+}
+
+@media (max-width: 768px) {
+  .ls-hero-box-video-stage,
+  .ls-hero-box-image-stage {
+    height: 300px;
+  }
+}
+
+
+/* ============================================================
+   PRINTABLE WORKSHEETS GALLERY (Matching Printable Search Grid)
+   ============================================================ */
+
+.ls-printable-gallery-section {
+  background: #FAFBFD;
+  border-top: 1px solid #E8EEF5;
+  border-bottom: 1px solid #E8EEF5;
+  padding: 4.5rem 0;
+  position: relative;
+}
+
+.ls-gallery-cat-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+}
+
+.ls-gallery-cat-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 9999px;
+  padding: 8px 16px;
+  font-family: var(--ls-font-display, "Nunito", sans-serif);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.ls-gallery-cat-btn:hover {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+  color: #1E293B;
+  transform: translateY(-1px);
+}
+
+.ls-gallery-cat-btn--active {
+  background: #3478E8 !important;
+  border-color: #2563EB !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(52, 120, 232, 0.25) !important;
+}
+
+/* 4-Column Grid on Desktop, 2 on Tablet, 1 on Mobile */
+.ls-printable-sheets-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.6rem;
+}
+
+.ls-sheet-card {
+  background: #FFFFFF;
+  border: 1px solid #E8EEF5;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(32, 54, 83, 0.04);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.ls-sheet-card:hover {
+  border-color: #93C5FD;
+  box-shadow: 0 12px 28px -4px rgba(52, 120, 232, 0.12);
+  transform: translateY(-3px);
+}
+
+/* Paper Sheet Mockup (Looks like real printed paper) */
+.ls-sheet-paper {
+  position: relative;
+  background: #FFFFFF;
+  border-bottom: 1px solid #F1F5F9;
+  aspect-ratio: 1 / 1.34;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.ls-sheet-paper-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: #F8FAFC;
+  border-bottom: 1px solid #EDF2F7;
+  font-size: 0.65rem;
+}
+
+.ls-sheet-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--ls-font-display, "Nunito", sans-serif);
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #2563EB;
+}
+
+.ls-sheet-brand-star {
+  font-size: 0.75rem;
+  color: #F59E0B;
+}
+
+.ls-sheet-header-lines {
+  display: flex;
+  gap: 8px;
+  color: #94A3B8;
+  font-weight: 600;
+  font-size: 0.62rem;
+}
+
+.ls-sheet-preview-body {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FFFFFF;
+  overflow: hidden;
+}
+
+.ls-svg-worksheet {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.ls-sheet-custom-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Hover Quick Overlay */
+.ls-sheet-hover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 5;
+}
+
+.ls-sheet-card:hover .ls-sheet-hover-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ls-sheet-overlay-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  font-family: var(--ls-font-display, "Nunito", sans-serif);
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.15s ease;
+}
+
+.ls-sheet-overlay-btn:hover {
+  transform: scale(1.05);
+}
+
+.ls-sheet-overlay-btn--save {
+  background: #3478E8;
+  color: #FFFFFF;
+}
+
+.ls-sheet-overlay-btn--view {
+  background: #FFFFFF;
+  color: #1E293B;
+}
+
+/* Sheet Card Details Footer */
+.ls-sheet-card-info {
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.ls-sheet-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 0.5rem;
+}
+
+.ls-sheet-tag {
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+
+.ls-sheet-grade-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #64748B;
+  background: #F1F5F9;
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+
+.ls-sheet-card-title {
+  font-family: var(--ls-font-display, "Nunito", sans-serif);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #1E293B;
+  margin: 0 0 0.35rem;
+  line-height: 1.35;
+}
+
+.ls-sheet-card-desc {
+  font-size: 0.76rem;
+  color: #64748B;
+  margin: 0 0 0.85rem;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+.ls-sheet-actions-row {
+  display: flex;
+  gap: 6px;
+  margin-top: auto;
+  border-top: 1px solid #F1F5F9;
+  padding-top: 0.75rem;
+}
+
+.ls-sheet-action-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-family: var(--ls-font-display, "Nunito", sans-serif);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.ls-sheet-action-btn--primary {
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+  color: #2563EB;
+}
+
+.ls-sheet-action-btn--primary:hover {
+  background: #3478E8;
+  border-color: #2563EB;
+  color: #FFFFFF;
+}
+
+.ls-sheet-action-btn--secondary {
+  background: #F8FAFC;
+  border-color: #E2E8F0;
+  color: #64748B;
+}
+
+.ls-sheet-action-btn--secondary:hover {
+  background: #EDF2F7;
+  color: #1E293B;
+}
+
+/* Toast notification */
+.ls-gallery-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #FFFFFF;
+  border: 1.5px solid #BBF7D0;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  color: #065F46;
+  font-family: var(--ls-font-display, "Nunito", sans-serif);
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 10px 18px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 1000;
+}
+
+/* ── Fullscreen Modal Preview ── */
+.ls-sheet-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.ls-sheet-modal-dialog {
+  background: #FFFFFF;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 680px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+}
+
+.ls-sheet-modal-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #F8FAFC;
+}
+
+.ls-sheet-modal-title {
+  font-family: var(--ls-font-display, "Nunito", sans-serif);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1E293B;
+  margin: 0;
+}
+
+.ls-sheet-modal-sub {
+  font-size: 0.76rem;
+  color: #64748B;
+  font-weight: 600;
+}
+
+.ls-sheet-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ls-modal-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-family: var(--ls-font-display, "Nunito", sans-serif);
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
+}
+
+.ls-modal-btn--save {
+  background: #3478E8;
+  color: #FFFFFF;
+}
+
+.ls-modal-btn--save:hover {
+  background: #2563EB;
+}
+
+.ls-modal-btn--print {
+  background: #EFF6FF;
+  color: #2563EB;
+  border: 1px solid #BFDBFE;
+}
+
+.ls-modal-btn--print:hover {
+  background: #DBEAFE;
+}
+
+.ls-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: #64748B;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.ls-modal-close-btn:hover {
+  background: #E2E8F0;
+  color: #1E293B;
+}
+
+.ls-sheet-modal-viewport {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background: #E2E8F0;
+  display: flex;
+  justify-content: center;
+}
+
+.ls-modal-paper-sheet {
+  background: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 520px;
+  aspect-ratio: 1 / 1.36;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ls-modal-sheet-header {
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #F1F5F9;
+  background: #FAFBFD;
+}
+
+.ls-modal-header-fields {
+  display: flex;
+  gap: 12px;
+  font-size: 0.72rem;
+  color: #64748B;
+  font-weight: 700;
+}
+
+.ls-modal-sheet-body {
+  flex: 1;
+  background: #FFFFFF;
+}
+
+.ls-modal-full-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+@media (max-width: 1100px) {
+  .ls-printable-sheets-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .ls-printable-sheets-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ls-printable-sheets-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ============================================================
+   ENHANCED PRINTABLE WORKSHEETS GALLERY CARDS
+   ============================================================ */
+
+/* ── Gallery Header with side decorations ── */
+.ls-gallery-header-wrap {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  justify-content: center;
+  margin-bottom: 3rem;
+}
+
+.ls-gallery-header-deco {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.ls-gallery-deco-icon {
+  display: block;
+  line-height: 1;
+  animation: ls-gallery-deco-bob 3s ease-in-out infinite alternate;
+}
+
+.ls-gallery-deco-icon:nth-child(2) { animation-delay: 0.8s; }
+.ls-gallery-deco-icon:nth-child(3) { animation-delay: 1.6s; }
+
+@keyframes ls-gallery-deco-bob {
+  0%   { transform: translateY(0) rotate(-2deg); }
+  100% { transform: translateY(-8px) rotate(3deg); }
+}
+
+@media (max-width: 768px) {
+  .ls-gallery-header-wrap { flex-direction: column; gap: 1rem; }
+  .ls-gallery-header-deco { flex-direction: row; }
+}
+
+/* ── Enhanced Card ── */
+.ls-sheet-card--enhanced {
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1.5px solid #E8EEF5;
+  background: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s ease,
+              border-color 0.25s ease;
+  box-shadow: 0 4px 16px rgba(32, 54, 83, 0.05);
+  position: relative;
+}
+
+.ls-sheet-card--enhanced:hover {
+  transform: translateY(-6px) scale(1.015);
+  box-shadow: 0 16px 40px rgba(32, 54, 83, 0.12);
+  border-color: rgba(52, 120, 232, 0.3);
+}
+
+/* ── Illustrated card header ── */
+.ls-sheet-card-illus-header {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+}
+
+/* Floating emoji decorations */
+.ls-sheet-illus-emoji {
+  position: absolute;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+}
+
+.ls-sheet-illus-emoji--main {
+  font-size: 3.8rem;
+  top: 10px;
+  left: 14px;
+  animation: ls-illus-main-bob 3.2s ease-in-out infinite;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+}
+
+.ls-sheet-illus-emoji--sm1 {
+  font-size: 1.4rem;
+  top: 12px;
+  right: 18px;
+  animation: ls-illus-sm-bob 2.6s ease-in-out infinite 0.4s;
+  opacity: 0.8;
+}
+
+.ls-sheet-illus-emoji--sm2 {
+  font-size: 1.1rem;
+  bottom: 14px;
+  left: 22px;
+  animation: ls-illus-sm-bob 3.5s ease-in-out infinite 1s;
+  opacity: 0.65;
+}
+
+@keyframes ls-illus-main-bob {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50%       { transform: translateY(-7px) rotate(4deg); }
+}
+
+@keyframes ls-illus-sm-bob {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-5px) scale(1.15); }
+}
+
+/* ── Mini paper mockup inside header ── */
+.ls-sheet-mini-paper {
+  position: relative;
+  width: 120px;
+  height: 148px;
+  background: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255,255,255,0.8);
+  transition: transform 0.2s ease;
+}
+
+.ls-sheet-card--enhanced:hover .ls-sheet-mini-paper {
+  transform: rotate(-2deg) scale(1.04);
+}
+
+.ls-sheet-mini-paper-top {
+  padding: 4px 7px;
+  background: #F8FAFC;
+  border-bottom: 1px solid #EDF2F7;
+  flex-shrink: 0;
+}
+
+.ls-sheet-mini-brand {
+  font-size: 0.5rem;
+  font-weight: 800;
+  color: #2563EB;
+  letter-spacing: 0.02em;
+}
+
+/* re-use .ls-sheet-preview-body already styled in unicorn-and-media.css */
+.ls-sheet-mini-paper .ls-sheet-preview-body {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* hover overlay on header */
+.ls-sheet-card-illus-header .ls-sheet-hover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 5;
+}
+
+.ls-sheet-card--enhanced:hover .ls-sheet-card-illus-header .ls-sheet-hover-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Ribbon badge (top-right corner) variant ── */
+.ls-sheet-card--enhanced .ls-sheet-card-info {
+  padding: 0.9rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0;
+}
+
+/* Tighter action button styles for enhanced cards */
+.ls-sheet-card--enhanced .ls-sheet-action-btn--primary {
+  background: transparent;
+  border-width: 1.5px;
+  border-style: solid;
+  font-weight: 700;
+  transition: all 0.15s ease;
+}
+
+.ls-sheet-card--enhanced .ls-sheet-action-btn--primary:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}

@@ -1,0 +1,174 @@
+/* ============================================================
+   GLOBALS — reset, fonts, CSS variables, accessibility
+   ============================================================ */
+
+@import "tailwindcss";
+
+/* ─── CSS Custom Properties ──────────────────────────────── */
+:root {
+  /* Brand palette */
+  --color-sky:     #4F8EF7;
+  --color-purple:  #7B5EA7;
+  --color-yellow:  #F7C948;
+  --color-coral:   #F4845F;
+  --color-mint:    #43B89C;
+  --color-peach:   #FFBA93;
+  --color-pink:    #EC407A;
+  --color-green:   #66BB6A;
+  --color-teal:    #26C6DA;
+  --color-indigo:  #5C6BC0;
+  --color-orange:  #FFA726;
+
+  /* Semantic */
+  --color-bg:      #FAFBFF;
+  --color-surface: #FFFFFF;
+  --color-text:    #1A1A2E;
+  --color-muted:   #6B7280;
+  --color-border:  #E5E9F2;
+
+  /* Spacing scale */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  40px;
+  --space-2xl: 64px;
+  --space-3xl: 96px;
+
+  /* Border radii */
+  --radius-sm:  8px;
+  --radius-md:  16px;
+  --radius-lg:  24px;
+  --radius-xl:  32px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm:  0 2px 8px rgba(79,142,247,0.08);
+  --shadow-md:  0 4px 20px rgba(79,142,247,0.12);
+  --shadow-lg:  0 8px 40px rgba(79,142,247,0.16);
+  --shadow-xl:  0 16px 60px rgba(79,142,247,0.20);
+  --shadow-card: 0 4px 24px rgba(26,26,46,0.08);
+  --shadow-hover: 0 8px 40px rgba(26,26,46,0.14);
+
+  /* Transitions */
+  --transition-fast:   150ms ease;
+  --transition-base:   250ms ease;
+  --transition-slow:   400ms ease;
+  --transition-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Typography */
+  --font-display: "Fredoka One", "Nunito", sans-serif;
+  --font-body:    "Nunito", sans-serif;
+
+  /* Navbar */
+  --navbar-height: 72px;
+}
+
+/* ─── Reset & Base ──────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ─── Typography Scale ───────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+p { line-height: 1.7; }
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input, textarea, select {
+  font-family: var(--font-body);
+}
+
+/* ─── Focus Styles ───────────────────────────────────────── */
+:focus-visible {
+  outline: 3px solid var(--color-sky);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar         { width: 8px; height: 8px; }
+::-webkit-scrollbar-track   { background: #F0F2FA; border-radius: 4px; }
+::-webkit-scrollbar-thumb   { background: #C5D0E8; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-sky); }
+
+/* ─── Selection ──────────────────────────────────────────── */
+::selection {
+  background: rgba(79, 142, 247, 0.2);
+  color: var(--color-text);
+}
+
+/* ─── Reduced Motion ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Common Utility Classes ─────────────────────────────── */
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: var(--space-lg);
+}
+
+@media (max-width: 768px) {
+  .container { padding-inline: var(--space-md); }
+}
+
+/* ─── Print Reset ────────────────────────────────────────── */
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; color: black; }
+}
