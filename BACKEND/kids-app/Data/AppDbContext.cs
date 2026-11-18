@@ -62,6 +62,7 @@ namespace kids_app.Data
 
             modelBuilder.Entity<LearningLevel>(entity =>
             {
+                 entity.ToTable("learninglevels");
                 entity.HasKey(x => x.LevelId);
 
                 entity.HasIndex(x => x.LevelName).IsUnique();
@@ -70,6 +71,8 @@ namespace kids_app.Data
 
             modelBuilder.Entity<TopicLevelConfiguration>(entity =>
             {
+                entity.ToTable("topiclevelconfigurations");
+                entity.ToTable("");
                 entity.HasKey(x => x.TopicLevelConfigurationId);
 
                 entity.HasOne(x => x.Level)
@@ -93,6 +96,7 @@ namespace kids_app.Data
 
             modelBuilder.Entity<Difficulty>(entity =>
             {
+                entity.ToTable("difficulties");
                 entity.HasKey(x => x.DifficultyId);
 
                 entity.HasIndex(x => x.Name)
@@ -101,6 +105,7 @@ namespace kids_app.Data
 
             modelBuilder.Entity<TopicLevelDifficulty>(entity =>
             {
+                entity.ToTable("topicleveldifficulties");
                 entity.HasKey(x => new
                 {
                     x.TopicLevelConfigurationId,
@@ -120,6 +125,7 @@ namespace kids_app.Data
 
             modelBuilder.Entity<VisualStyle>(entity =>
             {
+                entity.ToTable("visualstyles");
                 entity.HasKey(x => x.VisualStyleId);
 
                 entity.HasIndex(x => x.Name)
@@ -128,6 +134,7 @@ namespace kids_app.Data
 
             modelBuilder.Entity<TopicLevelVisualStyle>(entity =>
             {
+                entity.ToTable("topiclevelvisualstyles");
                 entity.HasKey(x => new
                 {
                     x.TopicLevelConfigurationId,
@@ -147,6 +154,8 @@ namespace kids_app.Data
 
             modelBuilder.Entity<QuestionType>(entity =>
             {
+
+                entity.ToTable("questiontypes");
                 entity.HasKey(x => x.QuestionTypeId);
 
                 entity.HasIndex(x => x.Code)
@@ -159,6 +168,7 @@ namespace kids_app.Data
             });
             modelBuilder.Entity<TopicLevelQuestionType>(entity =>
             {
+                entity.ToTable("TopicLevelQuestionTypes");
                 entity.HasKey(x => new
                 {
                     x.TopicLevelConfigurationId,
@@ -178,6 +188,7 @@ namespace kids_app.Data
 
             modelBuilder.Entity<QuestionCountOption>(entity =>
             {
+                entity.ToTable("questioncountOptions");
                 entity.HasKey(x => x.QuestionCountOptionId);
 
                 entity.HasOne(x => x.Configuration)
@@ -195,6 +206,7 @@ namespace kids_app.Data
 
             modelBuilder.Entity<WorksheetCategory>(entity =>
             {
+                entity.ToTable("worksheetcategories");
                 entity.HasKey(x => x.WorksheetCategoryId);
 
                 entity.HasOne(x => x.WorksheetTopics)
@@ -213,6 +225,7 @@ namespace kids_app.Data
 
             modelBuilder.Entity<VisualStyleItem>(entity =>
             {
+                entity.ToTable("visualstyleitems");
                 entity.HasKey(x => x.VisualStyleItemId);
 
                 entity.HasOne(x => x.visualStyle)
@@ -237,6 +250,7 @@ namespace kids_app.Data
 
             modelBuilder.Entity<PreGeneratedWorksheet>(entity =>
             {
+                entity.ToTable("pregeneratedworksheets");
                 entity.HasKey(x => x.PreGeneratedWorksheetId);
 
                 entity.Property(x => x.WorksheetTitle)
