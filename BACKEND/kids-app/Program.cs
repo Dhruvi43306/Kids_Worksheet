@@ -8,7 +8,6 @@ using kids_app.Services.Service;
 using kids_app.Validators;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
-x
 namespace kids_app
 {
     public class Program
