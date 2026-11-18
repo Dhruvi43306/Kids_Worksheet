@@ -8,7 +8,7 @@ using kids_app.Services.Service;
 using kids_app.Validators;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
-
+x
 namespace kids_app
 {
     public class Program
@@ -16,6 +16,13 @@ namespace kids_app
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            // Render production port binding
+            if (builder.Environment.IsProduction())
+            {
+                var port = Environment.GetEnvironmentVariable("PORT") ?? "10000";
+
+                builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+            }
             var connectionString = builder.Configuration
                 .GetConnectionString("DefaultConnection");
 
@@ -75,22 +82,60 @@ namespace kids_app
             });
 
             var app = builder.Build();
+            app.Use(async (context, next) =>
+            {
+                Console.WriteLine(
+                    $"REQUEST RECEIVED: {context.Request.Method} {context.Request.Path}");
+
+                await next();
+
+                Console.WriteLine(
+                    $"RESPONSE STATUS: {context.Response.StatusCode}");
+            });
 
             if (app.Environment.IsDevelopment())
             {
+                app.UseHttpsRedirection();
+
                 app.MapOpenApi();
                 app.MapScalarApiReference("/");
             }
-
-            app.UseHttpsRedirection();
             app.UseCors("AllowNextJs");
-
             app.UseAuthorization();
 
+            // Production API welcome endpoint
+            app.MapGet("/", () =>
+            {
+                return Results.Ok(new
+                {
+                    message = "Kids Worksheet API is running!",
+                    status = "Healthy"
+                });
+            });
+
+            // Database connection test
+            app.MapGet("/health/db", async (AppDbContext db) =>
+            {
+                try
+                {
+                    bool connected = await db.Database.CanConnectAsync();
+
+                    return connected
+                        ? Results.Ok(new { database = "Connected" })
+                        : Results.StatusCode(503);
+                }
+                catch
+                {
+                    return Results.StatusCode(503);
+                }
+            });
 
             app.MapControllers();
 
             app.Run();
+
+
+           
         }
     }
 }
