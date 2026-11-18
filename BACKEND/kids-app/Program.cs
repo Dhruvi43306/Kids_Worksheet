@@ -65,7 +65,10 @@ namespace kids_app
                 options.AddPolicy("AllowNextJs", policy =>
                 {
                     policy
-                        .WithOrigins("http://localhost:3000")
+                        .WithOrigins(
+                            "http://localhost:3000",
+                            "https://kids-worksheet-ten.vercel.app"
+                        )
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                 });
