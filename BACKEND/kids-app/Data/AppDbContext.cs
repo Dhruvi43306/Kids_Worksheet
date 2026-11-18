@@ -72,7 +72,6 @@ namespace kids_app.Data
             modelBuilder.Entity<TopicLevelConfiguration>(entity =>
             {
                 entity.ToTable("topiclevelconfigurations");
-                entity.ToTable("");
                 entity.HasKey(x => x.TopicLevelConfigurationId);
 
                 entity.HasOne(x => x.Level)
@@ -168,7 +167,7 @@ namespace kids_app.Data
             });
             modelBuilder.Entity<TopicLevelQuestionType>(entity =>
             {
-                entity.ToTable("TopicLevelQuestionTypes");
+                entity.ToTable("topiclevelquestiontypes");
                 entity.HasKey(x => new
                 {
                     x.TopicLevelConfigurationId,
