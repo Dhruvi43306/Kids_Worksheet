@@ -293,7 +293,17 @@ namespace kids_app.Data
                 entity.HasIndex(x => x.IsActive);
                 entity.HasIndex(x => x.DisplayOrder);
             });
+            modelBuilder.Entity<GeneratedWorksheet>(entity =>
+            {
+                entity.ToTable("generatedworksheets");
+                entity.HasKey(x => x.GeneratedWorksheetId);
+            });
 
+            modelBuilder.Entity<GeneratedQuestion>(entity =>
+            {
+                entity.ToTable("generatedquestions");
+                entity.HasKey(x => x.GeneratedQuestionId);
+            });
 
         }
 
