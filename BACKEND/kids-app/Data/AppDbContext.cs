@@ -187,7 +187,7 @@ namespace kids_app.Data
 
             modelBuilder.Entity<QuestionCountOption>(entity =>
             {
-                entity.ToTable("questioncountOptions");
+                entity.ToTable("questioncountoptions");
                 entity.HasKey(x => x.QuestionCountOptionId);
 
                 entity.HasOne(x => x.Configuration)
