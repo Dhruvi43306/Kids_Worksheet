@@ -86,12 +86,23 @@ namespace kids_app
                 Console.WriteLine(
                     $"REQUEST RECEIVED: {context.Request.Method} {context.Request.Path}");
 
-                await next();
+                try
+                {
+                    await next();
 
-                Console.WriteLine(
-                    $"RESPONSE STATUS: {context.Response.StatusCode}");
+                    Console.WriteLine(
+                        $"RESPONSE STATUS: {context.Response.StatusCode}");
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine(
+                        $"REQUEST FAILED: {context.Request.Path}");
+
+                    Console.Error.WriteLine(ex.ToString());
+
+                    throw;
+                }
             });
-
             if (app.Environment.IsDevelopment())
             {
                 app.UseHttpsRedirection();

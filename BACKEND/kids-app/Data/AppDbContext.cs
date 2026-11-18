@@ -32,6 +32,7 @@ namespace kids_app.Data
 
             modelBuilder.Entity<Subject>(entity =>
             {
+                entity.ToTable("subjects");
                 entity.HasKey(x => x.SubjectId);
 
                 entity.HasIndex(x => x.slug).IsUnique();
@@ -42,6 +43,7 @@ namespace kids_app.Data
 
             modelBuilder.Entity<WorksheetTopics>(entity =>
             {
+                entity.ToTable("worksheettopics");
                 entity.HasKey(x => x.TopicId);
                 entity.HasOne(s => s.Subject)
 
@@ -272,7 +274,7 @@ namespace kids_app.Data
                 {
                     x.TopicLevelConfigurationId,
                     x.DifficultyId,
-                    x.WorksheetCategoryId
+                    x.WorksheetCategoryId   
                 });
 
                 entity.HasIndex(x => x.IsActive);
