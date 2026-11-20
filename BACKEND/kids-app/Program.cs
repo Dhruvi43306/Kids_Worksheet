@@ -3,7 +3,6 @@ using kids_app.Data;
 using kids_app.Interfaces;
 using kids_app.Services;
 using kids_app.Services.Interface;
-using kids_app.Services.PrintableWorksheet;
 using kids_app.Services.Service;
 using kids_app.Validators;
 using Microsoft.EntityFrameworkCore;
@@ -114,31 +113,31 @@ namespace kids_app
             app.UseAuthorization();
 
             // Production API welcome endpoint
-            app.MapGet("/", () =>
-            {
-                return Results.Ok(new
-                {
-                    message = "Kids Worksheet API is running!",
-                    status = "Healthy"
-                });
-            });
+            //app.MapGet("/", () =>
+            //{
+            //    return Results.Ok(new
+            //    {
+            //        message = "Kids Worksheet API is running!",
+            //        status = "Healthy"
+            //    });
+            //});
 
             // Database connection test
-            app.MapGet("/health/db", async (AppDbContext db) =>
-            {
-                try
-                {
-                    bool connected = await db.Database.CanConnectAsync();
+            //app.MapGet("/health/db", async (AppDbContext db) =>
+            //{
+            //    try
+            //    {
+            //        bool connected = await db.Database.CanConnectAsync();
 
-                    return connected
-                        ? Results.Ok(new { database = "Connected" })
-                        : Results.StatusCode(503);
-                }
-                catch
-                {
-                    return Results.StatusCode(503);
-                }
-            });
+            //        return connected
+            //            ? Results.Ok(new { database = "Connected" })
+            //            : Results.StatusCode(503);
+            //    }
+            //    catch
+            //    {
+            //        return Results.StatusCode(503);
+            //    }
+            //});
 
             app.MapControllers();
 

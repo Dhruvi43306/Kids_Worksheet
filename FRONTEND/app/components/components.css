@@ -3288,3 +3288,628 @@
     flex: 1;
   }
 }
+
+/* =====================================================
+   LOCAL IMAGE GALLERY — Earlier Learner · Easy
+   (rmt-local-* prefix keeps these isolated from the
+   backend worksheet styles above)
+===================================================== */
+
+/* Section header above the local image grid */
+.rmt-local-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: linear-gradient(120deg, #eef5ff, #f5f1ff);
+  border: 1px solid #dde8fa;
+  border-radius: 10px;
+}
+
+.rmt-local-section-header__left {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #3c5e96;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.rmt-local-count {
+  flex-shrink: 0;
+  padding: 5px 10px;
+  background: #fff;
+  border: 1px solid #d5e4f8;
+  border-radius: 20px;
+  color: #4a6fa5;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Local image card — extends the shared rmt-worksheet-card */
+.rmt-local-card {
+  border-color: #dde8f8;
+}
+
+.rmt-local-card:hover {
+  border-color: #b8cfee;
+  box-shadow: 0 10px 28px rgba(50, 90, 155, 0.09);
+}
+
+/* Thumbnail button */
+.rmt-local-card__thumb {
+  cursor: zoom-in !important;
+  position: relative;
+  background: #f4f7fc !important;
+}
+
+.rmt-local-card__thumb img {
+  transition: transform 0.25s ease;
+}
+
+.rmt-local-card:hover .rmt-local-card__thumb img {
+  transform: scale(1.03);
+}
+
+/* Fallback placeholder when image fails to load */
+.rmt-local-card__fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  color: #7a93b5;
+  font-size: 11px;
+}
+
+/* Action row inside local card body */
+.rmt-local-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 11px;
+  border-top: 1px solid #edf0f5;
+  flex-wrap: wrap;
+}
+
+/* Shared local action button base */
+.rmt-local-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 11px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.18s ease, color 0.18s ease;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+/* Preview button */
+.rmt-local-btn--preview {
+  flex: 1;
+  justify-content: space-between;
+  background: transparent;
+  border-color: #d6e4f5;
+  color: #3669a9;
+}
+
+.rmt-local-btn--preview:hover {
+  background: #eef5ff;
+  color: #2457a0;
+}
+
+/* Print button */
+.rmt-local-btn--print {
+  background: #f0f7ff;
+  border-color: #c8dff7;
+  color: #3b6ea9;
+}
+
+.rmt-local-btn--print:hover {
+  background: #daeeff;
+  color: #2a5c9a;
+}
+
+/* Download button */
+.rmt-local-btn--download {
+  background: #f7f0ff;
+  border-color: #d9c8f5;
+  color: #6b3fad;
+}
+
+.rmt-local-btn--download:hover {
+  background: #ecdaff;
+  color: #5a31a0;
+}
+
+/* Divider between local and backend sections */
+.rmt-section-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 28px 0 20px;
+  color: #8c9db4;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.rmt-section-divider::before,
+.rmt-section-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #dde5ef;
+}
+
+/* Responsive adjustments for local grid */
+@media (max-width: 1100px) {
+  .rmt-local-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .rmt-local-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rmt-local-card__actions {
+    flex-direction: column;
+  }
+
+  .rmt-local-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .rmt-local-btn--preview {
+    justify-content: space-between;
+  }
+}
+
+/* Backend error — compact notice, doesn't block local images */
+.rmt-error--dismissible {
+  margin-bottom: 14px;
+}
+
+/* =====================================================
+   LEARNSPARK — PROFESSIONAL WORKSHEET IMAGE CARDS
+   Append this block at the END of components.css
+===================================================== */
+
+/* Worksheet grid */
+.rmt-local-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  align-items: stretch;
+}
+
+/* Main card */
+.rmt-local-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e5eaf1;
+  border-radius: 15px;
+  box-shadow: 0 3px 12px rgba(32, 55, 85, 0.045);
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.rmt-local-card:hover {
+  transform: translateY(-5px);
+  border-color: #c9d9ef;
+  box-shadow: 0 13px 30px rgba(37, 70, 115, 0.11);
+}
+
+/* Image preview area */
+.rmt-local-card__thumb {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: auto;
+  min-height: 275px;
+  aspect-ratio: 4 / 5;
+  padding: 15px;
+  overflow: hidden;
+  border: 0;
+  border-bottom: 1px solid #edf0f5;
+  border-radius: 0;
+  background: #f3f6fa;
+  cursor: zoom-in;
+}
+
+/* Actual worksheet image */
+.rmt-local-card__thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 310px;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 5px;
+  background: #ffffff;
+  box-shadow: 0 2px 9px rgba(30, 48, 72, 0.07);
+  transition: transform 0.3s ease;
+}
+
+.rmt-local-card:hover .rmt-local-card__thumb img {
+  transform: scale(1.025);
+}
+
+/* Image fallback */
+.rmt-local-card__fallback {
+  position: absolute;
+  inset: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #8294ac;
+  background: #ffffff;
+  border: 1px dashed #d4deeb;
+  border-radius: 8px;
+}
+
+.rmt-local-card__fallback small {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Card information area */
+.rmt-local-card .rmt-worksheet-card__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 17px;
+}
+
+/* Worksheet title */
+.rmt-local-card .rmt-worksheet-card__body h3 {
+  display: -webkit-box;
+  min-height: 42px;
+  margin: 0 0 12px;
+  overflow: hidden;
+  color: #253b58;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* Category label */
+.rmt-local-card .rmt-worksheet-meta {
+  margin-bottom: 17px;
+}
+
+.rmt-local-card .rmt-worksheet-meta span {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  color: #52729c;
+  background: #f0f5fb;
+  border: 1px solid #e1eaf5;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* Card action buttons */
+.rmt-local-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid #edf0f5;
+  flex-wrap: nowrap;
+}
+
+/* Common button style */
+.rmt-local-card__actions .rmt-local-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* Preview — primary action */
+.rmt-local-card__actions .rmt-local-btn--preview {
+  flex: 1;
+  justify-content: center;
+  color: #ffffff;
+  background: #356db5;
+  border-color: #356db5;
+}
+
+.rmt-local-card__actions .rmt-local-btn--preview:hover {
+  color: #ffffff;
+  background: #285b9e;
+  border-color: #285b9e;
+}
+
+/* Print */
+.rmt-local-card__actions .rmt-local-btn--print {
+  flex: 0 0 auto;
+  color: #426b9c;
+  background: #f3f7fc;
+  border-color: #dce7f3;
+}
+
+.rmt-local-card__actions .rmt-local-btn--print:hover {
+  color: #285b9e;
+  background: #e8f1fc;
+  border-color: #cbdcf0;
+}
+
+/* Download */
+.rmt-local-card__actions .rmt-local-btn--download {
+  flex: 0 0 auto;
+  color: #55704f;
+  background: #f2f7f0;
+  border-color: #dce9d7;
+}
+
+.rmt-local-card__actions .rmt-local-btn--download:hover {
+  color: #3d6337;
+  background: #e8f2e4;
+  border-color: #cbdcc4;
+}
+
+/* Section heading */
+.rmt-local-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 14px 17px;
+  background: #ffffff;
+  border: 1px solid #e5eaf1;
+  border-radius: 10px;
+}
+
+.rmt-local-section-header__left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #354f73;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.rmt-local-section-header__left svg {
+  color: #4779b8;
+}
+
+.rmt-local-count {
+  flex-shrink: 0;
+  padding: 6px 11px;
+  color: #496c98;
+  background: #eff5fc;
+  border: 1px solid #dce8f6;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+/* Tablet */
+@media (max-width: 1100px) {
+  .rmt-local-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .rmt-local-card__thumb {
+    min-height: 260px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .rmt-local-grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .rmt-local-card__thumb {
+    min-height: 280px;
+    max-height: 360px;
+  }
+
+  .rmt-local-card .rmt-worksheet-card__body {
+    padding: 15px;
+  }
+
+  .rmt-local-card__actions {
+    gap: 7px;
+  }
+
+  .rmt-local-card__actions .rmt-local-btn {
+    min-height: 40px;
+    padding: 0 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rmt-local-card,
+  .rmt-local-card__thumb img,
+  .rmt-local-card__actions .rmt-local-btn {
+    transition: none;
+  }
+}
+/* ==========================================
+   LEARNSPARK - COMPACT WORKSHEET CARDS
+========================================== */
+
+/* 4 cards per row on desktop */
+.rmt-local-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+  align-items: stretch;
+}
+
+/* Compact card */
+.rmt-local-card {
+  min-width: 0;
+  border-radius: 12px !important;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 3px 12px rgba(30, 55, 90, 0.07);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rmt-local-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 7px 18px rgba(30, 55, 90, 0.12);
+}
+
+/* Smaller worksheet image area */
+.rmt-local-card__thumb {
+  height: 215px !important;
+  min-height: 215px !important;
+  max-height: 215px !important;
+  aspect-ratio: auto !important;
+  padding: 12px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #f5f8fc;
+}
+
+.rmt-local-card__thumb img {
+  width: 100%;
+  height: 100%;
+  max-height: 190px !important;
+  object-fit: contain !important;
+  display: block;
+}
+
+/* Compact card content */
+.rmt-local-card .rmt-worksheet-card__body {
+  padding: 13px !important;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 9px !important;
+}
+
+/* Worksheet title */
+.rmt-local-card .rmt-worksheet-card__body h3 {
+  font-size: 14px !important;
+  line-height: 1.4;
+  margin: 0;
+  min-height: 38px;
+}
+
+/* Category label */
+.rmt-local-card .rmt-local-card__category {
+  font-size: 11px;
+  padding: 6px 9px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+/* Compact action buttons */
+.rmt-local-card .rmt-local-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px !important;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.rmt-local-card .rmt-local-btn {
+  min-height: 34px !important;
+  padding: 7px 10px !important;
+  font-size: 11px !important;
+  border-radius: 7px !important;
+  gap: 5px;
+}
+
+.rmt-local-card .rmt-local-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Tablet: 3 cards */
+@media (max-width: 1100px) {
+  .rmt-local-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+
+  .rmt-local-card__thumb {
+    height: 195px !important;
+    min-height: 195px !important;
+    max-height: 195px !important;
+  }
+}
+
+/* Small tablet: 2 cards */
+@media (max-width: 760px) {
+  .rmt-local-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .rmt-local-card__thumb {
+    height: 185px !important;
+    min-height: 185px !important;
+    max-height: 185px !important;
+  }
+}
+
+/* Mobile: 1 card */
+@media (max-width: 480px) {
+  .rmt-local-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .rmt-local-card__thumb {
+    height: 220px !important;
+    min-height: 220px !important;
+    max-height: 220px !important;
+  }
+
+  .rmt-local-card .rmt-worksheet-card__body h3 {
+    font-size: 14px !important;
+  }
+}

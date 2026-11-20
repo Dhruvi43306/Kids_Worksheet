@@ -13,8 +13,7 @@ import {
   Download,
   FileText,
   Filter,
-  GraduationCap,
-  Layers3,
+  ImageIcon,
   LoaderCircle,
   Printer,
   RefreshCw,
@@ -24,9 +23,16 @@ import {
 
 import "@/app/components/components.css";
 
+import {
+  getWorksheetImages,
+  hasLocalImages,
+  type WorksheetImage,
+} from "@/lib/worksheetImageMap";
+
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
 
 const LIBRARY_HOME_ROUTE = "/printable-worksheets";
+
 // =====================================================
 // API TYPES
 // =====================================================
@@ -56,42 +62,21 @@ interface WorksheetCategory {
 }
 
 // =====================================================
-// TOPIC OPTIONS
+// TOPIC
 // =====================================================
 
 interface TopicOptions {
   topicId: number;
   topicName: string;
-  levels: LevelOption[];
-}
-
-interface LevelOption {
-  topicLevelConfigurationId: number;
-  levelId: number;
-  levelName: string;
-  displayOrder: number;
-  difficulties: DifficultyOption[];
-}
-
-interface DifficultyOption {
-  difficultyId: number;
-  difficultyName: string;
-  displayOrder: number;
 }
 
 // =====================================================
-// WORKSHEET
+// LOCAL IMAGE PREVIEW
 // =====================================================
 
-interface Worksheet {
-  preGeneratedWorksheetId: number;
-  worksheetTitle: string;
-  worksheetUrl: string;
-  thumbnailUrl?: string | null;
-  fileType: string;
-  displayOrder: number;
-  levelName?: string;
-  difficultyName?: string;
+interface LocalPreview {
+  src: string;
+  title: string;
 }
 
 // =====================================================
@@ -118,9 +103,7 @@ async function apiGet<T>(endpoint: string): Promise<T> {
   try {
     json = await response.json();
   } catch {
-    throw new Error(
-      `Invalid API response (${response.status}).`
-    );
+    throw new Error(`Invalid API response (${response.status}).`);
   }
 
   const object =
@@ -134,7 +117,7 @@ async function apiGet<T>(endpoint: string): Promise<T> {
     const errors = object?.Errors ?? object?.errors;
 
     throw new Error(
-      Array.isArray(errors) && errors.length
+      Array.isArray(errors) && errors.length > 0
         ? errors.join("; ")
         : String(
             object?.message ??
@@ -187,24 +170,136 @@ async function apiGet<T>(endpoint: string): Promise<T> {
 }
 
 // =====================================================
-// FILE TYPE
+// MAP DATABASE TOPIC NAME TO LOCAL IMAGE FOLDER
+//
+// Database topic:
+// Math / Mathematics
+//
+// Actual public folder:
+// public/Addition/
+//
+// Image URLs:
+// /Addition/c1/a11.jpg
+// /Addition/c2/...
+//
+// Category names are not used as image folder names.
 // =====================================================
 
-function getFileType(type: string, url: string) {
-  const value = (type || "").toUpperCase();
+function getImageSubjectName(topicName: string): string {
+  const normalized = topicName
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
 
-  if (
-    ["PNG", "JPG", "JPEG", "WEBP", "GIF"].includes(value) ||
-    /\.(png|jpe?g|webp|gif)(\?.*)?$/i.test(url)
-  ) {
-    return "image";
+  const subjectAliases: Record<string, string> = {
+    math: "Addition",
+    mathematics: "Addition",
+    addition: "Addition",
+  };
+
+  return subjectAliases[normalized] ?? topicName.trim();
+}
+
+// =====================================================
+// CATEGORY IMAGE FOLDER CODE
+//
+// First category  -> c1
+// Second category -> c2
+// Third category  -> c3
+//
+// If the database category code is already c1, c2, etc.,
+// use that code directly.
+// =====================================================
+
+function getCategoryFolderCode(
+  category: WorksheetCategory,
+  categories: WorksheetCategory[]
+): string {
+  const databaseCode = category.code?.trim() ?? "";
+
+  if (/^c\d+$/i.test(databaseCode)) {
+    return databaseCode.toLowerCase();
   }
 
-  if (value === "PDF" || /\.pdf(\?.*)?$/i.test(url)) {
-    return "pdf";
+  const position =
+    categories.findIndex(
+      (item) =>
+        Number(item.worksheetCategoryId) ===
+        Number(category.worksheetCategoryId)
+    ) + 1;
+
+  return position > 0 ? `c${position}` : "";
+}
+
+// =====================================================
+// PRINT LOCAL IMAGE
+// =====================================================
+
+function printLocalImage(src: string): void {
+  const win = window.open("", "_blank");
+
+  if (!win) {
+    window.alert(
+      "Please allow pop-ups in your browser to print this worksheet."
+    );
+    return;
   }
 
-  return "other";
+  const safeSrc = src.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+
+  win.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Print Worksheet</title>
+
+        <style>
+          @page {
+            size: A4;
+            margin: 10mm;
+          }
+
+          * {
+            box-sizing: border-box;
+          }
+
+          html,
+          body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+          }
+
+          body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+          }
+
+          img {
+            max-width: 100%;
+            max-height: 277mm;
+            height: auto;
+            width: auto;
+            object-fit: contain;
+            display: block;
+          }
+        </style>
+      </head>
+
+      <body>
+        <img
+          src="${safeSrc}"
+          alt="Worksheet"
+          onload="window.print();"
+          onerror="document.body.innerHTML='<p>Unable to load worksheet image.</p>';"
+        />
+      </body>
+    </html>
+  `);
+
+  win.document.close();
 }
 
 // =====================================================
@@ -216,11 +311,11 @@ export default function PreGeneratedTopicPage() {
 
   const params = useParams<{ topics: string }>();
 
-const topicId = Number(params.topics);
+  const topicId = Number(params.topics);
 
-  // ---------------------------------------------------
+  // ===================================================
   // DATABASE DATA
-  // ---------------------------------------------------
+  // ===================================================
 
   const [topicOptions, setTopicOptions] =
     useState<TopicOptions | null>(null);
@@ -228,57 +323,95 @@ const topicId = Number(params.topics);
   const [categories, setCategories] =
     useState<WorksheetCategory[]>([]);
 
-  const [worksheets, setWorksheets] =
-    useState<Worksheet[]>([]);
-
-  // ---------------------------------------------------
+  // ===================================================
   // SELECTIONS
-  // ---------------------------------------------------
+  // ===================================================
 
   const [categoryId, setCategoryId] = useState("");
 
-  const [levelId, setLevelId] = useState("");
+  const [localPreview, setLocalPreview] =
+    useState<LocalPreview | null>(null);
 
-  const [difficultyId, setDifficultyId] = useState("");
+  // ===================================================
+  // LOCAL IMAGE DATA
+  // ===================================================
 
-  const [preview, setPreview] = useState<Worksheet | null>(null);
+  const [localImages, setLocalImages] =
+    useState<WorksheetImage[]>([]);
 
-  // ---------------------------------------------------
+  // ===================================================
   // UI STATES
-  // ---------------------------------------------------
+  // ===================================================
 
   const [loadingTopic, setLoadingTopic] = useState(true);
-
-  const [loadingWorksheets, setLoadingWorksheets] = useState(false);
 
   const [error, setError] = useState("");
 
   const [search, setSearch] = useState("");
 
-  // ---------------------------------------------------
-  // CURRENT SELECTED LEVEL
-  // ---------------------------------------------------
+  // ===================================================
+  // SELECTED CATEGORY
+  // ===================================================
 
-  const levels = topicOptions?.levels ?? [];
-
-  const selectedLevel = levels.find(
-    (item) => String(item.levelId) === levelId
-  );
-
-  // Difficulties are dependent on the selected level.
-  const difficulties = selectedLevel?.difficulties ?? [];
-
-  const selectedDifficulty = difficulties.find(
-    (item) => String(item.difficultyId) === difficultyId
-  );
-
-  const selectedCategory = categories.find(
-    (item) =>
-      String(item.worksheetCategoryId) === categoryId
-  );
+  const selectedCategory = useMemo(() => {
+    return (
+      categories.find(
+        (item) =>
+          String(item.worksheetCategoryId) === categoryId
+      ) ?? null
+    );
+  }, [categories, categoryId]);
 
   // ===================================================
-  // 1. LOAD TOPIC, CATEGORIES AND CONFIGURATIONS
+  // DATABASE TOPIC NAME
+  // ===================================================
+
+  const subjectName = topicOptions?.topicName?.trim() ?? "";
+
+  // ===================================================
+  // LOCAL IMAGE SUBJECT NAME
+  //
+  // Math -> Addition
+  // Mathematics -> Addition
+  //
+  // Other subject names remain unchanged.
+  // ===================================================
+
+  const imageSubjectName = useMemo(() => {
+    if (!subjectName) {
+      return "";
+    }
+
+    return getImageSubjectName(subjectName);
+  }, [subjectName]);
+
+  // ===================================================
+  // CATEGORY FOLDER CODE
+  // ===================================================
+
+  const categoryFolderCode = useMemo(() => {
+    if (!selectedCategory) {
+      return "";
+    }
+
+    return getCategoryFolderCode(
+      selectedCategory,
+      categories
+    );
+  }, [selectedCategory, categories]);
+
+  // ===================================================
+  // CHECK LOCAL IMAGES
+  // ===================================================
+
+  const showLocalImages =
+    !!selectedCategory &&
+    !!imageSubjectName &&
+    !!categoryFolderCode &&
+    hasLocalImages(imageSubjectName, categoryFolderCode);
+
+  // ===================================================
+  // 1. LOAD TOPIC AND CATEGORIES FROM BACKEND
   // ===================================================
 
   const loadTopicData = useCallback(async () => {
@@ -302,22 +435,34 @@ const topicId = Number(params.topics);
         ),
       ]);
 
-      if (options.topicId !== topicId) {
-        throw new Error("The returned topic does not match the requested topic.");
+      if (Number(options.topicId) !== topicId) {
+        throw new Error(
+          "The returned topic does not match the requested topic."
+        );
       }
 
-      setCategories(
-        Array.isArray(categoryRows)
-          ? categoryRows
-              .filter((item) => item.topicId === topicId)
-              .sort((a, b) => a.displayOrder - b.displayOrder)
-          : []
-      );
+      const sortedCategories = (
+        Array.isArray(categoryRows) ? categoryRows : []
+      )
+        .filter(
+          (item) => Number(item.topicId) === topicId
+        )
+        .sort(
+          (a, b) =>
+            Number(a.displayOrder) - Number(b.displayOrder)
+        );
 
+      setCategories(sortedCategories);
       setTopicOptions(options);
+      setCategoryId("");
+      setLocalImages([]);
+      setLocalPreview(null);
+      setSearch("");
     } catch (err) {
       setCategories([]);
       setTopicOptions(null);
+      setLocalImages([]);
+      setLocalPreview(null);
 
       setError(
         err instanceof Error
@@ -334,78 +479,39 @@ const topicId = Number(params.topics);
   }, [loadTopicData]);
 
   // ===================================================
-  // 2. LOAD WORKSHEETS
-  // All four IDs must match.
+  // 2. LOAD LOCAL IMAGES
+  //
+  // Images are loaded using only:
+  // imageSubjectName + categoryFolderCode
+  //
+  // Example:
+  // getWorksheetImages("Addition", "c1")
+  //
+  // No level or difficulty is required.
   // ===================================================
 
   useEffect(() => {
-    if (!categoryId || !levelId || !difficultyId) {
-      setWorksheets([]);
+    if (
+      !selectedCategory ||
+      !imageSubjectName ||
+      !categoryFolderCode
+    ) {
+      setLocalImages([]);
+      setLocalPreview(null);
       return;
     }
 
-    if (!selectedCategory || !selectedLevel || !selectedDifficulty) {
-      setWorksheets([]);
-      return;
-    }
+    const images = getWorksheetImages(
+      imageSubjectName,
+      categoryFolderCode
+    );
 
-    let cancelled = false;
-
-    const loadWorksheets = async () => {
-      setLoadingWorksheets(true);
-      setError("");
-      setWorksheets([]);
-
-      const query = new URLSearchParams({
-        categoryId,
-        levelId,
-        difficultyId,
-      });
-
-      try {
-        const rows = await apiGet<Worksheet[]>(
-          `/api/pre-generated-worksheets/topics/${topicId}/worksheets?${query.toString()}`
-        );
-
-        if (!cancelled) {
-          setWorksheets(
-            (Array.isArray(rows) ? rows : []).map((item) => ({
-              ...item,
-              levelName: selectedLevel.levelName,
-              difficultyName: selectedDifficulty.difficultyName,
-            }))
-          );
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setWorksheets([]);
-
-          setError(
-            err instanceof Error
-              ? err.message
-              : "Unable to load worksheets."
-          );
-        }
-      } finally {
-        if (!cancelled) {
-          setLoadingWorksheets(false);
-        }
-      }
-    };
-
-    void loadWorksheets();
-
-    return () => {
-      cancelled = true;
-    };
+    setLocalImages(images);
+    setLocalPreview(null);
   }, [
-    topicId,
-    categoryId,
-    levelId,
-    difficultyId,
     selectedCategory,
-    selectedLevel,
-    selectedDifficulty,
+    imageSubjectName,
+    categoryFolderCode,
   ]);
 
   // ===================================================
@@ -414,124 +520,60 @@ const topicId = Number(params.topics);
 
   const handleCategoryChange = (nextCategoryId: string) => {
     setCategoryId(nextCategoryId);
-    setPreview(null);
+    setLocalPreview(null);
     setSearch("");
     setError("");
   };
 
   // ===================================================
-  // 4. LEVEL SELECTION
-  // ===================================================
-
-  const handleLevelChange = (nextLevelId: string) => {
-    setLevelId(nextLevelId);
-
-    // Clear old difficulty because it belongs
-    // to the previously selected level.
-    setDifficultyId("");
-
-    setPreview(null);
-    setSearch("");
-    setError("");
-    setWorksheets([]);
-  };
-
-  // ===================================================
-  // 5. DIFFICULTY SELECTION
-  // ===================================================
-
-  const handleDifficultyChange = (nextDifficultyId: string) => {
-    setDifficultyId(nextDifficultyId);
-
-    setPreview(null);
-    setSearch("");
-    setError("");
-  };
-
-  // ===================================================
-  // 6. RESET FILTERS
+  // 4. CLEAR FILTERS
   // ===================================================
 
   const clearFilters = () => {
     setCategoryId("");
-    setLevelId("");
-    setDifficultyId("");
-
-    setWorksheets([]);
-    setPreview(null);
-
+    setLocalImages([]);
+    setLocalPreview(null);
     setSearch("");
     setError("");
   };
 
   // ===================================================
-  // 7. RETRY
+  // 5. RETRY
   // ===================================================
 
   const retry = async () => {
-    if (
-      categoryId &&
-      levelId &&
-      difficultyId
-    ) {
-      // Changing a filter triggers the loading effect.
-      const query = new URLSearchParams({
-        categoryId,
-        levelId,
-        difficultyId,
-      });
-
-      setLoadingWorksheets(true);
-      setError("");
-
-      try {
-        const rows = await apiGet<Worksheet[]>(
-          `/api/pre-generated-worksheets/topics/${topicId}/worksheets?${query.toString()}`
-        );
-
-        setWorksheets(
-          (Array.isArray(rows) ? rows : []).map((item) => ({
-            ...item,
-            levelName: selectedLevel?.levelName ?? "",
-            difficultyName:
-              selectedDifficulty?.difficultyName ?? "",
-          }))
-        );
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Unable to load worksheets."
-        );
-      } finally {
-        setLoadingWorksheets(false);
-      }
-
-      return;
-    }
-
     await loadTopicData();
   };
 
   // ===================================================
-  // 8. SEARCH WORKSHEETS
+  // 6. FILTER LOCAL IMAGES
   // ===================================================
 
-  const filteredWorksheets = useMemo(
-    () =>
-      worksheets.filter((item) =>
-        item.worksheetTitle
-          .toLowerCase()
-          .includes(search.toLowerCase())
-      ),
-    [worksheets, search]
-  );
+  const filteredLocalImages = useMemo(() => {
+    const searchValue = search.trim().toLowerCase();
+
+    if (!searchValue) {
+      return localImages;
+    }
+
+    return localImages.filter((item) =>
+      item.title.toLowerCase().includes(searchValue)
+    );
+  }, [localImages, search]);
 
   // ===================================================
-  // 9. PREVIEW CLOSE
+  // 7. CLOSE PREVIEW
   // ===================================================
 
-  const closePreview = () => setPreview(null);
+  const closeLocalPreview = () => {
+    setLocalPreview(null);
+  };
+
+  // ===================================================
+  // 8. TOTAL WORKSHEET COUNT
+  // ===================================================
+
+  const totalVisible = filteredLocalImages.length;
 
   // ===================================================
   // MAIN PAGE
@@ -539,18 +581,22 @@ const topicId = Number(params.topics);
 
   return (
     <main className="rmt-page">
-      {/* HEADER */}
+
+      {/* =========================================
+          HEADER
+      ========================================== */}
 
       <header className="rmt-header">
         <div className="rmt-header__inner">
-          <button
+
+          {/* <button
             type="button"
             className="rmt-back"
             onClick={() => router.push(LIBRARY_HOME_ROUTE)}
           >
             <ArrowLeft size={17} />
             Back to Library
-          </button>
+          </button> */}
 
           <div className="rmt-breadcrumb">
             <button
@@ -569,18 +615,17 @@ const topicId = Number(params.topics);
 
           <div className="rmt-header__title">
             <div>
-              <span className="rmt-eyebrow">
+              {/* <span className="rmt-eyebrow">
                 PRINTABLE LEARNING RESOURCES
-              </span>
+              </span> */}
 
               <h1>
                 {topicOptions?.topicName ?? "Topic Worksheets"}
               </h1>
 
-              <p>
-                Find ready-made worksheets by category,
-                learning level and difficulty.
-              </p>
+              {/* <p>
+                Explore ready-made printable worksheets by category.
+              </p> */}
             </div>
 
             <div className="rmt-header__icon">
@@ -590,7 +635,9 @@ const topicId = Number(params.topics);
         </div>
       </header>
 
-      {/* PAGE CONTENT */}
+      {/* =========================================
+          PAGE CONTENT
+      ========================================== */}
 
       <section className="rmt-content">
         <div className="rmt-layout">
@@ -613,6 +660,7 @@ const topicId = Number(params.topics);
             {/* CATEGORIES */}
 
             <div className="rmt-sidebar__section">
+
               <div className="rmt-sidebar__section-title">
                 <FileText size={17} />
                 <h3>Categories</h3>
@@ -620,11 +668,16 @@ const topicId = Number(params.topics);
 
               {loadingTopic ? (
                 <div className="rmt-sidebar__loading">
-                  <LoaderCircle size={18} className="rmt-spin" />
+                  <LoaderCircle
+                    size={18}
+                    className="rmt-spin"
+                  />
+
                   Loading categories...
                 </div>
               ) : categories.length > 0 ? (
                 <div className="rmt-category-list">
+
                   {categories.map((item) => {
                     const active =
                       categoryId ===
@@ -635,7 +688,9 @@ const topicId = Number(params.topics);
                         type="button"
                         key={item.worksheetCategoryId}
                         className={`rmt-category-item ${
-                          active ? "rmt-category-item--active" : ""
+                          active
+                            ? "rmt-category-item--active"
+                            : ""
                         }`}
                         onClick={() =>
                           handleCategoryChange(
@@ -655,78 +710,13 @@ const topicId = Number(params.topics);
                       </button>
                     );
                   })}
+
                 </div>
               ) : (
                 <p className="rmt-sidebar__empty">
                   No active categories available for this topic.
                 </p>
               )}
-            </div>
-
-            {/* LEVEL FILTER */}
-
-            <div className="rmt-sidebar__section">
-              <div className="rmt-sidebar__section-title">
-                <GraduationCap size={18} />
-                <h3>Learning Level</h3>
-              </div>
-
-              <select
-                className="rmt-filter-select"
-                value={levelId}
-                disabled={loadingTopic || levels.length === 0}
-                onChange={(event) =>
-                  handleLevelChange(event.target.value)
-                }
-              >
-                <option value="">Select level</option>
-
-                {levels.map((item) => (
-                  <option
-                    key={item.topicLevelConfigurationId}
-                    value={item.levelId}
-                  >
-                    {item.levelName}
-                  </option>
-                ))}
-              </select>
-
-              <p className="rmt-filter-help">
-                Only levels configured for this topic are shown.
-              </p>
-            </div>
-
-            {/* DIFFICULTY FILTER */}
-
-            <div className="rmt-sidebar__section">
-              <div className="rmt-sidebar__section-title">
-                <Layers3 size={18} />
-                <h3>Difficulty</h3>
-              </div>
-
-              <select
-                className="rmt-filter-select"
-                value={difficultyId}
-                disabled={!levelId || difficulties.length === 0}
-                onChange={(event) =>
-                  handleDifficultyChange(event.target.value)
-                }
-              >
-                <option value="">Select difficulty</option>
-
-                {difficulties.map((item) => (
-                  <option
-                    key={item.difficultyId}
-                    value={item.difficultyId}
-                  >
-                    {item.difficultyName}
-                  </option>
-                ))}
-              </select>
-
-              <p className="rmt-filter-help">
-                Choose a level first to see its available difficulties.
-              </p>
             </div>
 
             {/* CLEAR FILTERS */}
@@ -739,6 +729,7 @@ const topicId = Number(params.topics);
               <RefreshCw size={15} />
               Clear All Filters
             </button>
+
           </aside>
 
           {/* ========================================
@@ -765,41 +756,29 @@ const topicId = Number(params.topics);
 
                 <p>
                   {selectedCategory
-                    ? "Your printable resources will appear here."
-                    : "Select a category from the sidebar, then choose a learning level and difficulty."}
+                    ? "Browse, preview, print or download your worksheets."
+                    : "Select a category from the sidebar to explore its worksheets."}
                 </p>
               </div>
 
               <span className="rmt-result-count">
-                {filteredWorksheets.length} worksheets
+                {totalVisible} worksheets
               </span>
             </div>
 
-            {/* FILTER SUMMARY */}
+            {/* SELECTED CATEGORY */}
 
-            {(selectedCategory || selectedLevel || selectedDifficulty) && (
+            {selectedCategory && (
               <div className="rmt-selected-filters">
-                {selectedCategory && (
-                  <span>
-                    Category: {selectedCategory.categoryName}
-                  </span>
-                )}
-
-                {selectedLevel && (
-                  <span>Level: {selectedLevel.levelName}</span>
-                )}
-
-                {selectedDifficulty && (
-                  <span>
-                    Difficulty: {selectedDifficulty.difficultyName}
-                  </span>
-                )}
+                <span>
+                  Category: {selectedCategory.categoryName}
+                </span>
               </div>
             )}
 
             {/* SEARCH */}
 
-            {worksheets.length > 0 && (
+            {/* {selectedCategory && localImages.length > 0 && (
               <div className="rmt-search">
                 <Search size={18} />
 
@@ -822,44 +801,57 @@ const topicId = Number(params.topics);
                   </button>
                 )}
               </div>
-            )}
+            )} */}
 
             {/* ERROR */}
 
             {error && (
-              <div className="rmt-error" role="alert">
+              <div
+                className="rmt-error rmt-error--dismissible"
+                role="alert"
+              >
                 <div>
-                  <strong>Unable to load resources</strong>
+                  <strong>Unable to load topic resources</strong>
                   <p>{error}</p>
                 </div>
 
-                <button type="button" onClick={() => void retry()}>
+                <button
+                  type="button"
+                  onClick={() => void retry()}
+                >
                   <RefreshCw size={15} />
                   Retry
                 </button>
               </div>
             )}
 
-            {/* LOADING WORKSHEETS */}
+            {/* ========================================
+                MAIN CONTENT
+            ========================================= */}
 
-            {loadingTopic || loadingWorksheets ? (
+            {loadingTopic ? (
               <div className="rmt-state">
-                <LoaderCircle size={35} className="rmt-spin" />
 
-                <h3>
-                  {loadingTopic
-                    ? "Loading topic resources..."
-                    : "Finding worksheets..."}
-                </h3>
+                <LoaderCircle
+                  size={35}
+                  className="rmt-spin"
+                />
 
-                <p>Fetching available resources from your library.</p>
+                <h3>Loading topic resources...</h3>
+
+                <p>
+                  Fetching available categories from your library.
+                </p>
+
               </div>
             ) : (
               <>
-                {/* NOTHING SELECTED */}
+
+                {/* NO CATEGORY SELECTED */}
 
                 {!selectedCategory && !error && (
                   <div className="rmt-state">
+
                     <div className="rmt-state__icon">
                       <BookOpen size={34} />
                     </div>
@@ -870,274 +862,307 @@ const topicId = Number(params.topics);
                       Select a category from the left sidebar
                       to begin exploring worksheets.
                     </p>
+
                   </div>
                 )}
 
-                {/* CATEGORY SELECTED, LEVEL NOT SELECTED */}
+                {/* ========================================
+                    LOCAL IMAGE GALLERY
+                ========================================= */}
 
                 {selectedCategory &&
-                  !levelId &&
-                  !error && (
-                    <div className="rmt-state">
-                      <div className="rmt-state__icon">
-                        <GraduationCap size={34} />
-                      </div>
+                  showLocalImages &&
+                  filteredLocalImages.length > 0 && (
+                    <>
 
-                      <h3>Select a Learning Level</h3>
+                      {/* SECTION HEADER */}
 
-                      <p>
-                        Choose a level from the sidebar to
-                        continue.
-                      </p>
-                    </div>
-                  )}
+                      {/* <div className="rmt-local-section-header">
 
-                {/* LEVEL SELECTED, DIFFICULTY NOT SELECTED */}
+                        {/* <div className="rmt-local-section-header__left">
+                          <ImageIcon size={18} />
 
-                {selectedCategory &&
-                  levelId &&
-                  !difficultyId &&
-                  !error && (
-                    <div className="rmt-state">
-                      <div className="rmt-state__icon">
-                        <Layers3 size={34} />
-                      </div>
+                          <span>
+                            Printable Worksheets —{" "}
+                            {selectedCategory.categoryName}
+                          </span>
+                        </div> 
 
-                      <h3>Select Difficulty</h3>
+                        <span className="rmt-local-count">
+                          {filteredLocalImages.length} images
+                        </span>
 
-                      <p>
-                        Choose an available difficulty for{" "}
-                        {selectedLevel?.levelName}.
-                      </p>
-                    </div>
-                  )}
+                      </div> */}
 
-                {/* WORKSHEET GRID */}
+                      {/* IMAGE GRID */}
 
-                {selectedCategory &&
-                  levelId &&
-                  difficultyId &&
-                  !error &&
-                  filteredWorksheets.length > 0 && (
-                    <div className="rmt-worksheet-grid">
-                      {filteredWorksheets.map((item) => (
-                        <article
-                          key={item.preGeneratedWorksheetId}
-                          className="rmt-worksheet-card"
-                        >
-                          <button
-                            type="button"
-                            className="rmt-worksheet-card__preview"
-                            onClick={() => setPreview(item)}
+                      <div className="rmt-worksheet-grid rmt-local-grid">
+
+                        {filteredLocalImages.map((item, index) => (
+                          <article
+                            key={`${item.src}-${index}`}
+                            className="rmt-worksheet-card rmt-local-card"
                           >
-                            {item.thumbnailUrl ? (
-                              <img
-                                src={item.thumbnailUrl}
-                                alt={item.worksheetTitle}
-                              />
-                            ) : getFileType(
-                                item.fileType,
-                                item.worksheetUrl
-                              ) === "image" ? (
-                              <img
-                                src={item.worksheetUrl}
-                                alt={item.worksheetTitle}
-                              />
-                            ) : (
-                              <div className="rmt-file-placeholder">
-                                <FileText size={44} />
-                                <span>
-                                  {item.fileType.toUpperCase()}
-                                </span>
-                              </div>
-                            )}
-                          </button>
 
-                          <div className="rmt-worksheet-card__body">
-                            <h3>{item.worksheetTitle}</h3>
-
-                            <div className="rmt-worksheet-meta">
-                              <span>
-                                {selectedLevel?.levelName}
-                              </span>
-
-                              <span>
-                                {selectedDifficulty?.difficultyName}
-                              </span>
-
-                              <span>
-                                {item.fileType.toUpperCase()}
-                              </span>
-                            </div>
+                            {/* THUMBNAIL */}
 
                             <button
                               type="button"
-                              className="rmt-preview-button"
-                              onClick={() => setPreview(item)}
+                              className="rmt-worksheet-card__preview rmt-local-card__thumb"
+                              onClick={() =>
+                                setLocalPreview({
+                                  src: item.src,
+                                  title: item.title,
+                                })
+                              }
+                              aria-label={`Preview ${item.title}`}
                             >
-                              Preview Worksheet
-                              <ArrowRight size={16} />
+
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={item.src}
+                                alt={item.title}
+                                onError={(event) => {
+                                  event.currentTarget.style.display =
+                                    "none";
+
+                                  const fallback =
+                                    event.currentTarget
+                                      .nextElementSibling as HTMLElement | null;
+
+                                  if (fallback) {
+                                    fallback.style.display = "flex";
+                                  }
+                                }}
+                              />
+
+                              {/* IMAGE FALLBACK */}
+
+                              <span
+                                className="rmt-local-card__fallback"
+                                style={{ display: "none" }}
+                              >
+                                <FileText size={36} />
+
+                                <small>
+                                  Image unavailable
+                                </small>
+                              </span>
+
                             </button>
-                          </div>
-                        </article>
-                      ))}
-                    </div>
+
+                            {/* CARD BODY */}
+
+                            <div className="rmt-worksheet-card__body">
+
+                              {/* <h3>{item.title}</h3> */}
+
+                              {/* <div className="rmt-worksheet-meta"> */}
+                                {/* <span>
+                                  {selectedCategory.categoryName}
+                                </span> */}
+                              {/* </div> */}
+
+                              {/* ACTION BUTTONS */}
+
+                              <div className="rmt-local-card__actions">
+
+                                {/* PREVIEW */}
+
+                                <button
+                                  type="button"
+                                  className="rmt-local-btn rmt-local-btn--preview"
+                                  onClick={() =>
+                                    setLocalPreview({
+                                      src: item.src,
+                                      title: item.title,
+                                    })
+                                  }
+                                >
+                                  Preview
+
+                                  <ArrowRight size={14} />
+                                </button>
+
+                                {/* PRINT */}
+
+                                <button
+                                  type="button"
+                                  className="rmt-local-btn rmt-local-btn--print"
+                                  onClick={() =>
+                                    printLocalImage(item.src)
+                                  }
+                                >
+                                  <Printer size={14} />
+
+                                  Print
+                                </button>
+
+                                {/* DOWNLOAD */}
+
+                                <a
+                                  href={item.src}
+                                  download
+                                  className="rmt-local-btn rmt-local-btn--download"
+                                >
+                                  <Download size={14} />
+
+                                  Download
+                                </a>
+
+                              </div>
+                            </div>
+
+                          </article>
+                        ))}
+
+                      </div>
+                    </>
                   )}
 
-                {/* NO WORKSHEETS */}
+                {/* ========================================
+                    NO IMAGES FOR SELECTED CATEGORY
+                ========================================= */}
 
                 {selectedCategory &&
-                  levelId &&
-                  difficultyId &&
-                  !error &&
-                  filteredWorksheets.length === 0 &&
-                  !search && (
+                  (!showLocalImages ||
+                    filteredLocalImages.length === 0) && (
                     <div className="rmt-state">
+
                       <div className="rmt-state__icon">
-                        <FileText size={34} />
+                        {search ? (
+                          <Search size={34} />
+                        ) : (
+                          <ImageIcon size={34} />
+                        )}
                       </div>
 
-                      <h3>No Worksheets Available</h3>
+                      <h3>
+                        {search
+                          ? "No Matching Worksheets"
+                          : "No Worksheets Available"}
+                      </h3>
 
                       <p>
-                        There are currently no uploaded worksheets
-                        for this category, level and difficulty.
+                        {search
+                          ? "Try another worksheet title or clear your search."
+                          : `No worksheet images were found for ${selectedCategory.categoryName}. Image folder lookup: ${imageSubjectName}/${categoryFolderCode}. Please check the image folder and filenames.`}
                       </p>
+
+                      {search && (
+                        <button
+                          type="button"
+                          className="rmt-clear-filters"
+                          onClick={() => setSearch("")}
+                        >
+                          <RefreshCw size={15} />
+                          Clear Search
+                        </button>
+                      )}
+
                     </div>
                   )}
 
-                {/* SEARCH NO RESULTS */}
-
-                {selectedCategory &&
-                  levelId &&
-                  difficultyId &&
-                  search &&
-                  filteredWorksheets.length === 0 && (
-                    <div className="rmt-state">
-                      <Search size={32} />
-
-                      <h3>No Matching Worksheets</h3>
-
-                      <p>
-                        Try another worksheet title.
-                      </p>
-                    </div>
-                  )}
               </>
             )}
+
           </div>
         </div>
       </section>
 
       {/* =========================================
-          WORKSHEET PREVIEW
+          LOCAL IMAGE PREVIEW MODAL
       ========================================== */}
 
-      {preview && (
+      {localPreview && (
         <div
           className="rmt-modal"
           role="dialog"
           aria-modal="true"
-          aria-label="Worksheet preview"
+          aria-label="Worksheet image preview"
         >
+
+          {/* BACKDROP */}
+
           <button
             type="button"
             className="rmt-modal__backdrop"
-            onClick={closePreview}
+            onClick={closeLocalPreview}
             aria-label="Close preview"
           />
 
+          {/* MODAL PANEL */}
+
           <div className="rmt-modal__panel">
+
+            {/* HEADER */}
+
             <header className="rmt-modal__header">
+
               <div>
                 <span>WORKSHEET PREVIEW</span>
 
-                <h2>{preview.worksheetTitle}</h2>
+                <h2>{localPreview.title}</h2>
 
                 <p>
-                  {selectedCategory?.categoryName} ·{" "}
-                  {selectedLevel?.levelName} ·{" "}
-                  {selectedDifficulty?.difficultyName}
+                  {selectedCategory?.categoryName ?? ""}
                 </p>
               </div>
 
               <button
                 type="button"
-                onClick={closePreview}
+                onClick={closeLocalPreview}
                 aria-label="Close"
               >
                 <X size={21} />
               </button>
+
             </header>
 
+            {/* IMAGE */}
+
             <div className="rmt-modal__content">
-              {getFileType(
-                preview.fileType,
-                preview.worksheetUrl
-              ) === "image" ? (
-                <img
-                  src={preview.worksheetUrl}
-                  alt={preview.worksheetTitle}
-                />
-              ) : getFileType(
-                  preview.fileType,
-                  preview.worksheetUrl
-                ) === "pdf" ? (
-                <iframe
-                  src={preview.worksheetUrl}
-                  title={preview.worksheetTitle}
-                />
-              ) : (
-                <div className="rmt-state">
-                  <FileText size={40} />
 
-                  <p>
-                    Preview is not available for this file type.
-                  </p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={localPreview.src}
+                alt={localPreview.title}
+              />
 
-                  <a
-                    href={preview.worksheetUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Open Worksheet
-                  </a>
-                </div>
-              )}
             </div>
 
+            {/* FOOTER */}
+
             <footer className="rmt-modal__footer">
+
               <a
-                href={preview.worksheetUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={localPreview.src}
+                download
                 className="rmt-modal__download"
               >
                 <Download size={17} />
-                Open / Download
+
+                Download
               </a>
 
               <button
                 type="button"
                 className="rmt-modal__print"
-                onClick={() => {
-                  const win = window.open(
-                    preview.worksheetUrl,
-                    "_blank"
-                  );
-
-                  if (win) {
-                    win.onload = () => win.print();
-                  }
-                }}
+                onClick={() =>
+                  printLocalImage(localPreview.src)
+                }
               >
                 <Printer size={17} />
+
                 Print
               </button>
+
             </footer>
+
           </div>
         </div>
       )}
+
     </main>
   );
 }
