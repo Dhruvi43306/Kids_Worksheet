@@ -447,7 +447,179 @@ const ODDEVEN_CATEGORIES: Record<string, CategoryImageConfig> = {
   ] },
 };
 
+const MULTIPLICATION_CATEGORIES: Record<string, CategoryImageConfig> = {
+  c1: {
+    images: [
+      "m11.jpeg",
+      "m12.jpeg",
+     
+    ],
+  },
+  c2: { 
+    images: [
+      "m21.jpeg",
+      "m22.jpeg",
+      "m23.jpeg",
+      "m24.jpeg",
+      "m25.jpeg",
+      "m26.jpeg"
+      
+    ] },
+  c3: { 
+    images: [
+      "m31.jpeg",
+      "m32.jpeg",
+      "m33.jpeg",
+      "m34.jpeg"
+    ] 
+  },
+  c4: { 
+    images: [
+      "m41.jpeg",
+      "m42.jpeg",
+      
+    ] 
+  },
+  c5: { 
+    images: [
+      "m51.jpeg",
+      "m52.jpeg",
+    ] 
+  },
+  c6: { 
+    images: [
+      "m61.jpeg",
+      "m62.jpeg",
+      "m63.jpeg",
+      "m64.jpeg"
+    ] 
+  },
+  c7: { 
+    images: [
 
+    ] 
+  },
+  c8: { 
+    images: [
+      "m81.jpeg",
+      "m82.jpeg",
+      "m83.jpeg",
+      "m84.jpeg",
+      "m85.jpeg"
+    ] 
+  },
+  c9: { 
+    images: [
+      "m91.jpeg",
+      "m92.jpeg",
+     
+    ] },
+  c10: { images: [
+      "m101.jpeg",
+      "m102.jpeg",
+      "m103.jpeg",
+      "m104.jpeg",
+      "m105.jpeg"
+  ] 
+},
+  c11: { images: [] },
+  c12: { 
+    images: [
+      "m121.jpeg",
+      "m122.jpeg",
+      "m123.jpeg",
+      "m124.jpeg",
+      "m125.jpeg"
+    ] },
+};
+const DIVISION_CATEGORIES: Record<string, CategoryImageConfig> = {
+  c1: {
+    images: [
+      "d11.jpeg",
+      "d12.jpeg",
+      "d13.jpeg",
+      "d14.jpeg",
+      "d15.jpeg"
+    ],
+  },
+
+  // Add actual filenames when available.
+  c2: { 
+    images: [
+      "d21.jpeg",
+      "d22.jpeg",
+      "d23.jpeg",
+      "d24.jpeg",
+      "d25.jpeg"
+    ] },
+  c3: { 
+    images: [
+      "d31.jpeg",
+      "d32.jpeg",
+      "d33.jpeg",
+      "d34.jpeg",
+    ] 
+  },
+  c4: { 
+    images: [
+      "d41.jpeg",
+      "d42.jpeg",
+      "d43.jpeg",
+      "d44.jpeg",
+      
+    ] },
+  c5: { 
+    images: [
+      "d51.jpeg",
+    
+    ] },
+  c6: { images: [
+      "d61.jpeg",
+      "d62.jpeg",
+      "d63.jpeg",
+  ] },
+  c7: { 
+    images: [
+      "d71.jpeg",
+      "d72.jpeg",
+      "d73.jpeg",
+      "d74.jpeg",
+      "d75.jpeg",
+      "d76.jpeg",
+      "d77.jpeg",
+      
+  ] },
+  c8: { 
+    images: [
+     
+    ] },
+  c9: { images: [
+     "d91.jpeg",
+      "d92.jpeg",
+      "d93.jpeg",
+      "d94.jpeg",
+      "d95.jpeg",
+      "d96.jpeg"
+  ] },
+  c10: { images: [
+      "d101.jpeg",
+      "d102.jpeg",
+      "d103.jpeg",
+      "d104.jpeg",
+      "d105.jpeg",
+      
+  ] },
+  c11: { images: [] },
+  c12: { images: [
+      "d121.jpeg",
+      "d122.jpeg",
+      "d123.jpeg",
+      "d124.jpeg",
+      "d125.jpeg",
+      "d126.jpeg"
+  ] },
+  
+};
 // =====================================================
 // SUBJECT AND TOPIC CONFIGURATION
 // =====================================================
@@ -488,6 +660,19 @@ const WORKSHEET_IMAGE_MAP: Record<string, SubjectImageConfig> = {
 
   categories: ODDEVEN_CATEGORIES,
 },
+Multiplication:{
+   aliases: [
+    "Multiplication Advanced",
+    "Multiplication",
+    "Multiply",
+  ],
+  folder:"Multiplication",
+  categories:MULTIPLICATION_CATEGORIES
+},
+Division:{
+  folder:"Division",
+  categories:DIVISION_CATEGORIES
+}
     },
   },
 
