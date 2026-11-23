@@ -712,7 +712,7 @@ export default function HomeClient() {
       </section>
 
       {/* ── 8. POPULAR WORKSHEETS ── */}
-      <section className="ls-home-section ls-home-section--popular">
+      {/* <section className="ls-home-section ls-home-section--popular">
         <div className="ls-home-container">
           <div className="ls-home-section-header">
             <span className="ls-home-eyebrow">Most Loved This Week</span>
@@ -727,7 +727,7 @@ export default function HomeClient() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* ── 9. REVIEWS ── */}
       <section className="ls-home-section ls-home-section--reviews">
