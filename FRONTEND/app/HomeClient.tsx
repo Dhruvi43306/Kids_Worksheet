@@ -616,30 +616,55 @@ export default function HomeClient() {
             </p>
           </div>
 
-          <div className="ls-home-benefits-grid">
-            {learningBenefits.map((b, i) => (
-              <motion.div
-                key={i}
-                className="ls-home-benefit-card"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
-              >
-                <div className="ls-benefit-emoji-cap" style={{ background: b.bg }}>
-                  {b.emoji}
-                </div>
-                <div className="ls-home-benefit-card__icon-box" style={{ backgroundColor: b.bg, color: b.color }}>
-                  {b.icon}
-                </div>
-                <span className="ls-home-benefit-card__tag" style={{ backgroundColor: b.bg, color: b.color }}>
-                  {b.tag}
-                </span>
-                <h3 className="ls-home-benefit-card__title">{b.title}</h3>
-                <p className="ls-home-benefit-card__desc">{b.desc}</p>
-              </motion.div>
-            ))}
-          </div>
+          
+<div className="ls-home-benefits-grid">
+  {learningBenefits.map((b, i) => (
+    <motion.div
+      key={i}
+      className="ls-home-benefit-card"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4, delay: i * 0.1 }}
+    >
+      {/* Centered visual section */}
+      <div
+        className="ls-home-benefit-card__visual"
+        style={{ "--benefit-bg": b.bg, "--benefit-color": b.color } as React.CSSProperties & Record<"--benefit-bg" | "--benefit-color", string>}
+      >
+        <div className="ls-benefit-emoji-cap">
+          {b.emoji}
+        </div>
+
+        <div className="ls-home-benefit-card__icon-box">
+          {b.icon}
+        </div>
+      </div>
+
+      {/* Benefit information */}
+      <div className="ls-home-benefit-card__content">
+        {/* <span
+          className="ls-home-benefit-card__tag"
+          style={{
+            backgroundColor: b.bg,
+            color: b.color
+          }}
+        >
+          {b.tag}
+        </span> */}
+
+        <h3 className="ls-home-benefit-card__title">
+          {b.title}
+        </h3>
+
+        <p className="ls-home-benefit-card__desc">
+          {b.desc}
+        </p>
+      </div>
+    </motion.div>
+  ))}
+</div>
+
         </div>
       </section>
 

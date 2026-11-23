@@ -745,7 +745,7 @@
   border-top: 1px solid #F1F5F9;
 }
 
-.ls-home-benefits-grid {
+/* .ls-home-benefits-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
@@ -799,7 +799,135 @@
   color: #64748B;
   line-height: 1.55;
   margin: 0;
+} */
+
+/* Benefits Grid */
+.ls-home-benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+  align-items: stretch;
 }
+
+/* Main Card */
+.ls-home-benefit-card {
+  background: #ffffff;
+  border: 1px solid #e8eef5;
+  border-radius: 20px;
+  padding: 1.75rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 300px;
+  box-shadow: var(--ls-shadow-card);
+  transition: transform 0.25s ease, box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.ls-home-benefit-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--ls-shadow-hover);
+  border-color: #d5e3f2;
+}
+
+/* Combined Icon and Emoji Area */
+.ls-home-benefit-card__visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 1.5rem;
+  min-height: 68px;
+}
+
+/* Emoji */
+.ls-benefit-emoji-cap {
+  width: 58px;
+  height: 58px;
+  border-radius: 17px;
+  background: var(--benefit-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  box-shadow: 0 5px 14px rgba(30, 50, 80, 0.06);
+}
+
+/* Main Icon */
+.ls-home-benefit-card__icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--benefit-bg);
+  color: var(--benefit-color);
+  font-size: 1.5rem;
+}
+
+/* Text Content */
+.ls-home-benefit-card__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+}
+
+/* Category Tag */
+.ls-home-benefit-card__tag {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  font-size: 0.73rem;
+  font-weight: 700;
+  padding: 0.35rem 0.7rem;
+  border-radius: 7px;
+  margin-bottom: 0.8rem;
+}
+
+/* Title */
+.ls-home-benefit-card__title {
+  font-family: var(--ls-font-display);
+  font-size: 1.12rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #203653;
+  margin: 0 0 0.55rem;
+}
+
+/* Description */
+.ls-home-benefit-card__desc {
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .ls-home-benefits-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .ls-home-benefits-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .ls-home-benefit-card {
+    min-height: auto;
+    padding: 1.5rem;
+  }
+
+  .ls-home-benefit-card__visual {
+    margin-bottom: 1.2rem;
+  }
+}
+
 
 /* ============================================================
    5. GRADE ADVENTURE MAP
