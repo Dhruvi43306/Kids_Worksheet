@@ -10,108 +10,140 @@ import {
   X,
   Sparkles,
   BookOpen,
-  Smile,
-  Search,
-  Calculator,
-  Bookmark,
   PenTool,
-  FlaskConical,
-  Puzzle,
   Globe,
   Palette,
-  FileText,
-  Compass,
+  Gamepad2,
+  Brain,
   ArrowRight,
+  Mail,
+  Users,
+  Calculator,
 } from "lucide-react";
 import "@/app/components/components.css";
 
-// Primary Links for top-level navigation
+// Keep Math as the existing direct navigation link.
 const PRIMARY_LINKS = [
   { label: "Math", href: "/math", icon: Calculator },
-  { label: "English", href: "/english", icon: Bookmark },
-  { label: "Science", href: "/science", badge: "New", icon: FlaskConical },
-  { label: "Puzzles", href: "/puzzles", icon: Puzzle },
 ];
 
-// Grouped sub-links for the "Explore" dropdown
-const EXPLORE_GROUPS = [
+// Each group has its own independent dropdown.
+const NAVBAR_GROUPS = [
   {
-    category: "Subjects",
+    category: "LEARNING RESOURCES",
+    title: "Build knowledge every day",
+    description: "Explore helpful resources that make learning easier and more enjoyable.",
+    // footer: "Discover something new to learn",
     items: [
       {
         label: "Reading",
         href: "/reading",
-        desc: "Comprehension & phonics",
+        desc: "Stories, reading comprehension and phonics",
+        // detail: "Read, understand and grow your vocabulary.",
         icon: BookOpen,
+        number: "01",
       },
       {
         label: "Writing",
         href: "/writing",
-        desc: "Grammar & essay skills",
+        desc: "Grammar, vocabulary and essay skills",
+        // detail: "Build confidence with words and sentences.",
         icon: PenTool,
+        number: "02",
       },
       {
         label: "General Knowledge",
         href: "/general-knowledge",
-        desc: "Trivia & geography",
+        desc: "Trivia, geography and the world around us",
+        // detail: "Discover interesting facts about our world.",
         icon: Globe,
+        number: "03",
       },
     ],
   },
   {
-    category: "Activities",
+    category: "FUN ACTIVITIES",
+    title: "Make learning an adventure",
+    description: "Create, play and challenge your thinking with fun activities.",
+    footer: "Learn something while having fun",
     items: [
       {
         label: "Arts & Crafts",
         href: "/arts",
-        desc: "Creative drawing & design",
+        desc: "Creative drawing, colouring and design",
+        detail: "Bring your imagination to life.",
         icon: Palette,
+        number: "01",
       },
       {
-        label: "Worksheets",
-        href: "/worksheets",
-        desc: "Printable PDF resources",
-        icon: FileText,
+        label: "Learning Games",
+        href: "/learning-games",
+        desc: "Interactive games for learning and practice",
+        detail: "Practice new skills through play.",
+        icon: Gamepad2,
+        number: "02",
+      },
+      {
+        label: "Brain Challenge",
+        href: "/brain-challenge",
+        desc: "Logic, memory and problem-solving puzzles",
+        detail: "Think smart and challenge yourself.",
+        icon: Brain,
+        number: "03",
       },
     ],
   },
 ];
 
+const ADDITIONAL_LINKS = [
+  { label: "Contact", href: "/contact", icon: Mail },
+  { label: "For Everyone", href: "/for-everyone", icon: Users },
+];
+
 export default function Navbar() {
   const pathname = usePathname();
-  const dropdownRef = useRef<HTMLLIElement>(null);
+  const navigationRef = useRef<HTMLUListElement>(null);
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [kidsMode, setKidsMode] = useState(false);
 
+  // Keep the existing sticky-navbar scroll behaviour.
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
+
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Close navigation menus after changing pages.
   useEffect(() => {
     setMobileOpen(false);
-    setDropdownOpen(false);
+    setOpenDropdown(null);
   }, [pathname]);
 
+  // Close dropdowns when clicking outside or pressing Escape.
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        navigationRef.current &&
+        !navigationRef.current.contains(event.target as Node)
       ) {
-        setDropdownOpen(false);
+        setOpenDropdown(null);
       }
     };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setDropdownOpen(false);
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpenDropdown(null);
+        setMobileOpen(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleKeyDown);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
@@ -121,9 +153,15 @@ export default function Navbar() {
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
+  const toggleDropdown = (category: string) => {
+    setOpenDropdown((current) => (current === category ? null : category));
+  };
+
   return (
     <header
-      className={`navbar-wrapper ${scrolled ? "navbar-wrapper--scrolled" : ""}`}
+      className={`navbar-wrapper ${
+        scrolled ? "navbar-wrapper--scrolled" : ""
+      }`}
     >
       <motion.nav
         className={`navbar ${kidsMode ? "navbar--kids-mode" : ""}`}
@@ -132,7 +170,7 @@ export default function Navbar() {
         transition={{ type: "spring", stiffness: 260, damping: 25 }}
       >
         <div className="navbar__inner">
-          {/* Brand Logo */}
+          {/* Brand logo */}
           <Link href="/" className="navbar__logo" aria-label="LearnSpark Home">
             <motion.div
               className="navbar__logo-badge"
@@ -141,41 +179,50 @@ export default function Navbar() {
             >
               <Sparkles size={18} className="logo-sparkle" />
             </motion.div>
+
             <span className="navbar__logo-text">
               Learn<span className="navbar__logo-accent">Spark</span>
             </span>
           </Link>
 
-          {/* Center Navigation Links */}
-          <ul className="navbar__links" role="list">
+          {/* Desktop navigation */}
+          <ul className="navbar__links" role="list" ref={navigationRef}>
+            {/* Home */}
             <li className="navbar__item">
               <Link
                 href="/"
-                className={`navbar__link ${isActive("/") ? "navbar__link--active" : ""}`}
+                className={`navbar__link ${
+                  isActive("/") ? "navbar__link--active" : ""
+                }`}
               >
                 Home
                 {isActive("/") && (
                   <motion.div
                     className="navbar__active-indicator"
                     layoutId="navbar-active"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 380,
+                      damping: 30,
+                    }}
                   />
                 )}
               </Link>
             </li>
 
+            {/* Math — existing direct route remains unchanged */}
             {PRIMARY_LINKS.map((link) => {
               const active = isActive(link.href);
+
               return (
                 <li key={link.href} className="navbar__item">
                   <Link
                     href={link.href}
-                    className={`navbar__link ${active ? "navbar__link--active" : ""}`}
+                    className={`navbar__link ${
+                      active ? "navbar__link--active" : ""
+                    }`}
                   >
                     <span>{link.label}</span>
-                    {link.badge && (
-                      <span className="navbar__pill-badge">{link.badge}</span>
-                    )}
                     {active && (
                       <motion.div
                         className="navbar__active-indicator"
@@ -192,75 +239,161 @@ export default function Navbar() {
               );
             })}
 
-            {/* Structured Mega-Dropdown */}
-            <li className="navbar__item" ref={dropdownRef}>
-              <button
-                className={`navbar__link navbar__dropdown-trigger ${
-                  dropdownOpen ? "navbar__dropdown-trigger--open" : ""
-                }`}
-                onClick={() => setDropdownOpen((v) => !v)}
-                aria-expanded={dropdownOpen}
-              >
-                <Compass size={15} />
-                <span>Explore</span>
-                <ChevronDown size={13} className="chevron-icon" />
-              </button>
+            {/* Learning Resources and Fun Activities dropdowns */}
+            {NAVBAR_GROUPS.map((group, index) => {
+              const GroupIcon = index === 0 ? BookOpen : Sparkles;
+              const isOpen = openDropdown === group.category;
+              const menuId = `learnspark-menu-${index}`;
 
-              <AnimatePresence>
-                {dropdownOpen && (
-                  <motion.div
-                    className="navbar__mega-menu"
-                    initial={{ opacity: 0, y: 12, scale: 0.98 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 8, scale: 0.98 }}
-                    transition={{ duration: 0.18, ease: "easeOut" }}
+              return (
+                <li
+                  key={group.category}
+                  className="navbar__item learnspark-nav-dropdown-item"
+                >
+                  <button
+                    type="button"
+                    className={`navbar__link navbar__dropdown-trigger learnspark-nav-dropdown-trigger ${
+                      isOpen ? "navbar__dropdown-trigger--open" : ""
+                    }`}
+                    onClick={() => toggleDropdown(group.category)}
+                    aria-expanded={isOpen}
+                    aria-haspopup="true"
+                    aria-controls={menuId}
                   >
-                    <div className="mega-menu__grid">
-                      {EXPLORE_GROUPS.map((group) => (
-                        <div key={group.category} className="mega-menu__column">
-                          <span className="mega-menu__label">
-                            {group.category}
-                          </span>
+                    <GroupIcon size={15} />
+                    <span>{group.category}</span>
+                    <ChevronDown
+                      size={13}
+                      className={`chevron-icon ${
+                        isOpen ? "learnspark-chevron-open" : ""
+                      }`}
+                    />
+                  </button>
+
+                  <AnimatePresence>
+                    {isOpen && (
+                      <motion.div
+                        id={menuId}
+                        role="menu"
+                        className="navbar__mega-menu learnspark-nav-dropdown"
+                        initial={{ opacity: 0, y: 10, scale: 0.985 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 8, scale: 0.985 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                      >
+                        <div className="learnspark-dropdown-header">
+                          <div className="learnspark-dropdown-heading">
+                            <span className="learnspark-dropdown-eyebrow">
+                              {group.category}
+                            </span>
+                            <h3>{group.title}</h3>
+                            <p>{group.description}</p>
+                          </div>
+
+                          <div className="learnspark-dropdown-sparkle" aria-hidden="true">
+                            <Sparkles size={25} />
+                          </div>
+                        </div>
+
+                        <div className="learnspark-dropdown-items">
                           {group.items.map((item) => {
                             const Icon = item.icon;
+                            const active = isActive(item.href);
+
                             return (
                               <Link
                                 key={item.href}
                                 href={item.href}
-                                className="mega-menu__item"
-                                onClick={() => setDropdownOpen(false)}
+                                role="menuitem"
+                                className={`mega-menu__item learnspark-dropdown-card ${
+                                  active ? "learnspark-dropdown-card--active" : ""
+                                }`}
+                                onClick={() => setOpenDropdown(null)}
                               >
-                                <div className="mega-menu__icon-box">
-                                  <Icon size={16} />
-                                </div>
-                                <div className="mega-menu__text">
-                                  <span className="mega-menu__title">
+                                <span className="learnspark-dropdown-number">
+                                  {item.number}
+                                </span>
+
+                                {/* <span className="mega-menu__icon-box learnspark-dropdown-icon">
+                                  <Icon size={19} />
+                                </span> */}
+
+                                <span className="mega-menu__text learnspark-dropdown-copy">
+                                  <span className="mega-menu__title learnspark-dropdown-title">
                                     {item.label}
                                   </span>
-                                  <span className="mega-menu__desc">
+                                  <span className="mega-menu__desc learnspark-dropdown-description">
                                     {item.desc}
                                   </span>
-                                </div>
+                                  {/* <span className="learnspark-dropdown-detail">
+                                    {item.detail}
+                                  </span> */}
+                                </span>
+
+                                <ArrowRight
+                                  size={16}
+                                  className="learnspark-dropdown-arrow"
+                                />
                               </Link>
                             );
                           })}
                         </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </li>
+
+                        {/* <div className="learnspark-dropdown-footer">
+                          <span className="learnspark-dropdown-footer-icon">
+                            <Sparkles size={14} />
+                          </span>
+                          <span>{group.footer}</span>
+                        </div> */}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </li>
+              );
+            })}
+
+            {/* Contact and For Everyone */}
+            {ADDITIONAL_LINKS.map((link) => {
+              const active = isActive(link.href);
+
+              return (
+                <li key={link.href} className="navbar__item">
+                  <Link
+                    href={link.href}
+                    className={`navbar__link ${
+                      active ? "navbar__link--active" : ""
+                    }`}
+                  >
+                    <span>{link.label}</span>
+                    {active && (
+                      <motion.div
+                        className="navbar__active-indicator"
+                        layoutId="navbar-active"
+                        transition={{
+                          type: "spring",
+                          stiffness: 380,
+                          damping: 30,
+                        }}
+                      />
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
+
+          {/* Sign in and mobile toggle */}
           <div className="navbar__actions">
             <Link href="/login" className="navbar__cta-btn">
               <span>Sign In</span>
               <ArrowRight size={14} />
             </Link>
+
             <button
               className="navbar__mobile-toggle"
-              onClick={() => setMobileOpen((v) => !v)}
+              onClick={() => setMobileOpen((value) => !value)}
               aria-label="Toggle Navigation Menu"
+              aria-expanded={mobileOpen}
             >
               {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -268,7 +401,7 @@ export default function Navbar() {
         </div>
       </motion.nav>
 
-      {/* Slide Drawer for Mobile View */}
+      {/* Mobile slide drawer */}
       <AnimatePresence>
         {mobileOpen && (
           <>
@@ -279,6 +412,7 @@ export default function Navbar() {
               exit={{ opacity: 0 }}
               onClick={() => setMobileOpen(false)}
             />
+
             <motion.aside
               className="mobile-drawer"
               initial={{ x: "100%" }}
@@ -291,6 +425,7 @@ export default function Navbar() {
                 <button
                   className="navbar__mobile-toggle"
                   onClick={() => setMobileOpen(false)}
+                  aria-label="Close Navigation"
                 >
                   <X size={20} />
                 </button>
@@ -302,6 +437,7 @@ export default function Navbar() {
                   <Link href="/" className="mobile-drawer__link">
                     Home
                   </Link>
+
                   {PRIMARY_LINKS.map((link) => (
                     <Link
                       key={link.href}
@@ -313,11 +449,15 @@ export default function Navbar() {
                   ))}
                 </div>
 
-                {EXPLORE_GROUPS.map((group) => (
-                  <div key={group.category} className="mobile-drawer__section">
+                {NAVBAR_GROUPS.map((group) => (
+                  <div
+                    key={group.category}
+                    className="mobile-drawer__section"
+                  >
                     <span className="mobile-drawer__label">
                       {group.category}
                     </span>
+
                     {group.items.map((item) => (
                       <Link
                         key={item.href}
@@ -329,6 +469,22 @@ export default function Navbar() {
                     ))}
                   </div>
                 ))}
+
+                <div className="mobile-drawer__section">
+                  <span className="mobile-drawer__label">
+                    More Information
+                  </span>
+
+                  {ADDITIONAL_LINKS.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="mobile-drawer__link"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
 
               <div className="mobile-drawer__footer">
