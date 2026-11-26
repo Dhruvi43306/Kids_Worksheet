@@ -31,7 +31,7 @@ namespace kids_app.Services
                     "IDENTIFY" =>
                         GenerateIdentifyOddEven(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, visualStyleName, usedGameCombinations),
                     "ODD_EVEN_OBJECT_TRANSFER" or "ODD_EVEN_OBJECT_PACKING_REMAINDER" or "ODD_EVEN_OBJECT_REMOVAL_TARGET" or "ODD_EVEN_HIDDEN_OBJECT_PARITY" =>
-                        GenerateOddEvenObjectWithParityOfMystery(questionNumber,questionType.QuestionTypeId,questionType.Code ?? string.Empty,levelId,difficultyId,usedGameCombinations),
+                        GenerateOddEvenObjectWithParityOfMystery(questionNumber, questionType.QuestionTypeId, questionType.Code ?? string.Empty, levelId, difficultyId, usedGameCombinations),
 
                     "CIRCLE_ODD" =>
                         GenerateCircleOdd(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedNumbers),
@@ -209,52 +209,57 @@ namespace kids_app.Services
                          GenerateSubtractionWithNumbers(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, questionType, usedGameCombinations),
 
                     "UNFILLED_LEVEL_SHIFT" or "MYSTERY_STORAGE_CHEST" or "CALENDAR_SUBTRACTION_MISSING_DAYS" =>
-                          GenerateVisualSubtractionQuestion(questionNumber,questionType.QuestionTypeId,levelId,difficultyId,questionType,visualIcons,usedGameCombinations),
+                          GenerateVisualSubtractionQuestion(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, questionType, visualIcons, usedGameCombinations),
 
                     "BROKEN_FUSE_COUNTDOWN_TRACK" or "DUAL_EXIT_COUNTDOWN_SPLIT" or "TARGET_LANDMARK_BRAKING_TRACK" or "LOOP_DE_LOOP_PORTAL_WARP" =>
-                        GenerateCountdownLoopTrack(questionNumber,questionType.QuestionTypeId,code,levelId,difficultyId,usedGameCombinations),
+                        GenerateCountdownLoopTrack(questionNumber, questionType.QuestionTypeId, code, levelId, difficultyId, usedGameCombinations),
 
-                     "STORY_GIVE_AWAY_TWICE" or
-                        "STORY_BUS_PASSENGERS" or "STORY_SPEND_TWICE" or "STORY_USE_SUPPLIES" =>
-                            GenerateTwoStepSubtractionStory(questionNumber,questionType.QuestionTypeId,levelId,difficultyId,questionType,usedGameCombinations),
+                    "STORY_GIVE_AWAY_TWICE" or
+                       "STORY_BUS_PASSENGERS" or "STORY_SPEND_TWICE" or "STORY_USE_SUPPLIES" =>
+                           GenerateTwoStepSubtractionStory(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, questionType, usedGameCombinations),
 
-                     "DETECTIVE_MISSING_NUMBER" or "DETECTIVE_FIND_ERROR" or "DETECTIVE_MATCH_EQUATION" or "DETECTIVE_NUMBER_CHAIN" =>
-                            GenerateSubtractionDetective(questionNumber,questionType.QuestionTypeId,levelId,difficultyId,questionType,usedGameCombinations),
+                    "DETECTIVE_MISSING_NUMBER" or "DETECTIVE_FIND_ERROR" or "DETECTIVE_MATCH_EQUATION" or "DETECTIVE_NUMBER_CHAIN" =>
+                           GenerateSubtractionDetective(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, questionType, usedGameCombinations),
 
-                    "SUBTRACT_WITHIN_ZERO_TEN" or"SUBTRACT_BY_COUNTING_BACK" or"SUBTRACT_BY_COUNTING_UP" or"MISSING_MINUEND_OR_SUBTRAHEND_WITHIN_TEN" or"SUBTRACT_WITHIN_ONE_TWENTY" or
+                    "SUBTRACT_WITHIN_ZERO_TEN" or "SUBTRACT_BY_COUNTING_BACK" or "SUBTRACT_BY_COUNTING_UP" or "MISSING_MINUEND_OR_SUBTRAHEND_WITHIN_TEN" or "SUBTRACT_WITHIN_ONE_TWENTY" or
                     "SUBTRACT_ONE_DIGIT_FROM_ONE_HUNDREDD_NO_REGROUPING" or
-                    "SUBTRACT_ONE_DIGIT_FROM_ONE_HUNDREED_MISSING_NUMBERS" or"SUBTRACT_WHOLE_TENS" or"SUBTRACT_WHOLE_TENS_MISSING_NUMBERS" or"SUBTRACT_FROM_WHOLE_TENS"
-                        => GenerateMentalSubtraction(questionNumber,questionType.QuestionTypeId,levelId,difficultyId,questionType,usedGameCombinations),
+                    "SUBTRACT_ONE_DIGIT_FROM_ONE_HUNDREED_MISSING_NUMBERS" or "SUBTRACT_WHOLE_TENS" or "SUBTRACT_WHOLE_TENS_MISSING_NUMBERS" or "SUBTRACT_FROM_WHOLE_TENS"
+                        => GenerateMentalSubtraction(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, questionType, usedGameCombinations),
 
                     "PIXEL_COLOR_BY_DIFFERENCE" or "PIXEL_FIX_BROKEN_SQUARES" or "PIXEL_MATCH_DIFFERENCE" or "PIXEL_MISSING_EQUATION" =>
-                            GenerateSubtractionPixelMystery(questionNumber,questionType.QuestionTypeId,levelId,difficultyId,questionType,usedGameCombinations),
+                            GenerateSubtractionPixelMystery(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, questionType, usedGameCombinations),
                     "VAULT_CIPHER_CODE" or "VAULT_SECURITY_FILTER" or "VAULT_LOCK_RANKING" or "VAULT_NUMBER_TILE_KEY" =>
-                            GenerateSubtractionEscapeVault(questionNumber,questionType.QuestionTypeId,levelId,difficultyId,questionType,usedGameCombinations),
+                            GenerateSubtractionEscapeVault(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, questionType, usedGameCombinations),
 
                     "NUMERIC_COMPENSATION_BRIDGE" or "NUMERIC_EQUATION_BALANCER" or "NUMERIC_TARGET_DIFFERENCE_BUILDER" or "NUMERIC_DIFFERENCE_PATTERN_CHECK" =>
-                            GenerateSubtractionNumberStrategyLab(questionNumber,questionType.QuestionTypeId,levelId,difficultyId,questionType,usedGameCombinations),
+                            GenerateSubtractionNumberStrategyLab(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, questionType, usedGameCombinations),
 
                     "NUMERIC_REVERSE_DIGIT_DIFFERENCE" or "NUMERIC_BORROWING_PREDICTOR" or "NUMERIC_DIGIT_CLUE_RECONSTRUCTION" or "NUMERIC_MAXIMUM_DIFFERENCE" =>
-                            GenerateSubtractionNumberPropertiesLab(questionNumber,questionType.QuestionTypeId,levelId,difficultyId,questionType,usedGameCombinations),
+                            GenerateSubtractionNumberPropertiesLab(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, questionType, usedGameCombinations),
 
                     "CONSTRAINT_DIFFERENCE_WINDOW" or "CONSTRAINT_OPERAND_CHANGE_IMPACT" or "CONSTRAINT_MINIMUM_ADJUSTMENT" or "CONSTRAINT_COUNT_VALID_PAIRS" =>
-                        GenerateSubtractionConstraintEngineering(questionNumber,questionType.QuestionTypeId,levelId,difficultyId,questionType,usedGameCombinations),
+                        GenerateSubtractionConstraintEngineering(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, questionType, usedGameCombinations),
 
 
                     "ALGORITHM_COLUMN_ALIGNMENT" or "ALGORITHM_REGROUP_TRACE" or "ALGORITHM_PARTIAL_DIFFERENCE_ASSEMBLY" or "ALGORITHM_INVERSE_VERIFICATION" =>
-                        GenerateSubtractionAlgorithmStudio(questionNumber,questionType.QuestionTypeId,levelId,difficultyId,questionType,usedGameCombinations),
+                        GenerateSubtractionAlgorithmStudio(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, questionType, usedGameCombinations),
 
-                    "MULTIPLICATION_COUNT_EQUAL_GROUPS" or "MULTIPLICATION_COMPLETE_GROUPS" or  "MULTIPLICATION_FIND_UNEQUAL_GROUP" or "MULTIPLICATION_SAME_TOTAL_GROUPS" =>
+                    "MULTIPLICATION_COUNT_EQUAL_GROUPS" or "MULTIPLICATION_COMPLETE_GROUPS" or "MULTIPLICATION_FIND_UNEQUAL_GROUP" or "MULTIPLICATION_SAME_TOTAL_GROUPS" =>
                         GenerateEarlyMultiplicationQuestion(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, questionType, visualIcons, usedGameCombinations),
 
                     "DIVISION_SHARE_EQUALLY" or "DIVISION_MAKE_EQUAL_GROUPS" or "DIVISION_FIX_UNFAIR_SHARE" or "DIVISION_FIND_LEFTOVER" =>
-                        GenerateEarlyDivisionQuestion(questionNumber,questionType.QuestionTypeId,levelId,difficultyId,questionType,visualIcons,usedGameCombinations),
+                        GenerateEarlyDivisionQuestion(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, questionType, visualIcons, usedGameCombinations),
 
                     "MULTIPLICATION_MISSING_NUMBER" or "MULTIPLICATION_PRODUCT_SELECTION" or "MULTIPLICATION_EQUATION_CHECK" or "MULTIPLICATION_NUMBER_PATTERN" or "MULTIPLICATION_EQUIVALENT_FACT" =>
-                        GenerateMultiplicationNumericalQuestion(questionNumber,levelId,difficultyId,questionType,usedGameCombinations),
+                        GenerateMultiplicationNumericalQuestion(questionNumber, levelId, difficultyId, questionType, usedGameCombinations),
 
                     "DIVISION_MISSING_QUOTIENT" or "DIVISION_MISSING_DIVIDEND_OR_DIVISOR" or "DIVISION_QUOTIENT_SELECTION" or "DIVISION_EQUATION_CHECK" or "DIVISION_RELATED_MULTIPLICATION" =>
-                        GenerateDivisionNumericalQuestion(questionNumber,levelId,difficultyId,questionType,usedGameCombinations),
+                        GenerateDivisionNumericalQuestion(questionNumber, levelId, difficultyId, questionType, usedGameCombinations),
+
+                    "IDENTIFY_UPPER_LOWER_CASE_LETTERS" =>
+                            GenerateIdentifyUpperLowerCase(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedGameCombinations),
+                    "MATCH_UPPER_LOWER_CASE_LETTERS" or "FIND_THE_MISSING_LETTERS" or "ARRANGE_LETTERS_ALPHA_ORDER" =>
+                            GenerateReadingFundamentalsQuestion(questionNumber,questionType.QuestionTypeId,questionType.Code,levelId,difficultyId,usedGameCombinations),
 
                     _ => throw new ArgumentException(
                    $"Question type '{questionType.TypeName}' " +
