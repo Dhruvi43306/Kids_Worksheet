@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -12,28 +13,48 @@ interface Props {
   index?: number;
 }
 
-export default function TopicCard({ topic, categorySlug, index = 0 }: Props) {
+export default function TopicCard({
+  topic,
+  categorySlug,
+  index = 0,
+}: Props) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.4, delay: index * 0.05, ease: "easeOut" }}
+      transition={{
+        duration: 0.4,
+        delay: index * 0.05,
+        ease: "easeOut",
+      }}
     >
       <Link
-        href={`/${categorySlug}/${topic.slug}`}
+        href={`/worksheets/${categorySlug}/${topic.slug}`}
         className="topic-card"
-        style={{ "--topic-color": topic.color } as React.CSSProperties}
+        style={
+          { "--topic-color": topic.color } as React.CSSProperties
+        }
       >
         <motion.div
           className="topic-card__inner"
-          whileHover={{ y: -4, boxShadow: "var(--shadow-hover)" }}
-          transition={{ type: "spring", stiffness: 350, damping: 22 }}
+          whileHover={{
+            y: -4,
+            boxShadow: "var(--shadow-hover)",
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 350,
+            damping: 22,
+          }}
         >
           <div className="topic-card__top">
             <div className="topic-card__icon-wrap">
-              <span className="topic-card__icon">{topic.icon}</span>
+              <span className="topic-card__icon">
+                {topic.icon}
+              </span>
             </div>
+
             <motion.div
               className="topic-card__arrow"
               initial={{ x: 0, opacity: 0.5 }}
@@ -43,26 +64,43 @@ export default function TopicCard({ topic, categorySlug, index = 0 }: Props) {
             </motion.div>
           </div>
 
-          <h3 className="topic-card__name">{topic.name}</h3>
-          <p className="topic-card__desc">{topic.description}</p>
+          <h3 className="topic-card__name">
+            {topic.name}
+          </h3>
+
+          <p className="topic-card__desc">
+            {topic.description}
+          </p>
 
           <div className="topic-card__footer">
-            <span className="topic-card__count">
-              <FileText size={13} />
-              {topic.worksheetCount} worksheets
-            </span>
-            <div className="topic-card__grades">
-              {topic.grades.slice(0, 2).map((g) => (
-                <span key={g} className="topic-card__grade-tag">
-                  {g.replace("Grade ", "G").replace("Kindergarten", "K").replace("Preschool", "Pre")}
-                </span>
-              ))}
-              {topic.grades.length > 2 && (
-                <span className="topic-card__grade-tag topic-card__grade-more">
-                  +{topic.grades.length - 2}
-                </span>
-              )}
-            </div>
+            {topic.worksheetCount > 0 && (
+              <span className="topic-card__count">
+                <FileText size={13} />
+                {topic.worksheetCount} worksheets
+              </span>
+            )}
+
+            {topic.grades.length > 0 && (
+              <div className="topic-card__grades">
+                {topic.grades.slice(0, 2).map((grade) => (
+                  <span
+                    key={grade}
+                    className="topic-card__grade-tag"
+                  >
+                    {grade
+                      .replace("Grade ", "G")
+                      .replace("Kindergarten", "K")
+                      .replace("Preschool", "Pre")}
+                  </span>
+                ))}
+
+                {topic.grades.length > 2 && (
+                  <span className="topic-card__grade-tag topic-card__grade-more">
+                    +{topic.grades.length - 2}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </motion.div>
       </Link>

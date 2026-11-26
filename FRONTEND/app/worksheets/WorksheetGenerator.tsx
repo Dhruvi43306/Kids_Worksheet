@@ -273,28 +273,28 @@ export default function WorksheetGenerator({ topic }: WorksheetGeneratorProps) {
 
   const handleQuestionCountSelect = (questionCountOptionId: number) =>
     setConfig((prev) => ({ ...prev, questionCountOptionId }));
-const toggleQuestionType = useCallback((questionTypeId: number) => {
-  setConfig((prev) => {
-    const exists = prev.questionTypeIds.includes(questionTypeId);
+  const toggleQuestionType = useCallback((questionTypeId: number) => {
+    setConfig((prev) => {
+      const exists = prev.questionTypeIds.includes(questionTypeId);
 
-    return {
-      ...prev,
-      questionTypeIds: exists
-        ? prev.questionTypeIds.filter((id) => id !== questionTypeId)
-        : [...prev.questionTypeIds, questionTypeId],
-    };
-  });
-}, []);
- const setQuestionTypeIds = useCallback(
-  (categoryId: number, ids: number[]) => {
-    setConfig((prev) => ({
-      ...prev,
-      categoryId,
-      questionTypeIds: ids,
-    }));
-  },
-  [],
-);
+      return {
+        ...prev,
+        questionTypeIds: exists
+          ? prev.questionTypeIds.filter((id) => id !== questionTypeId)
+          : [...prev.questionTypeIds, questionTypeId],
+      };
+    });
+  }, []);
+  const setQuestionTypeIds = useCallback(
+    (categoryId: number, ids: number[]) => {
+      setConfig((prev) => ({
+        ...prev,
+        categoryId,
+        questionTypeIds: ids,
+      }));
+    },
+    [],
+  );
   const handleGenerate = async () => {
     if (!config.levelId) {
       alert("Please select a level.");
@@ -351,7 +351,6 @@ const toggleQuestionType = useCallback((questionTypeId: number) => {
     router.push(`/worksheet?${params.toString()}`);
   };
 
-  
   const selectedDifficulty = difficulty.find(
     (d) => d.difficultyId === config.difficultyId,
   );
@@ -363,18 +362,16 @@ const toggleQuestionType = useCallback((questionTypeId: number) => {
   );
   const selectedLevel = levels.find((l) => l.levelId === config.levelId);
 
-  
   const stepsDone = [
-    config.levelId > 0, 
-    config.questionTypeIds.length > 0, 
-    config.difficultyId !== null, 
-    config.questionCountOptionId !== null, 
-    config.visualStyleId !== null, 
+    config.levelId > 0,
+    config.questionTypeIds.length > 0,
+    config.difficultyId !== null,
+    config.questionCountOptionId !== null,
+    config.visualStyleId !== null,
   ];
   const currentStep = stepsDone.findIndex((done) => !done);
   const activeMobileStep = currentStep === -1 ? STEPS.length : currentStep + 1;
 
-  
   return (
     <main className="wg">
       {/* ════════════════════════════════════════════════════
@@ -599,11 +596,12 @@ const toggleQuestionType = useCallback((questionTypeId: number) => {
               />
 
               {/* ── Step 5: Visual Style ────────────────── */}
-              {/* <VisualStyleSection
+              <VisualStyleSection
                 visualStyles={visualStyle}
                 selectedId={config.visualStyleId}
+                isLoading={loadingOptions}
                 onSelect={handleVisualStyleSelect}
-              /> */}
+              />
 
               {/* ── Summary + CTA ───────────────────────── */}
               <div

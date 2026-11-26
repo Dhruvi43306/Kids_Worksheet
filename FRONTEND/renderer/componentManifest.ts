@@ -87,6 +87,9 @@ export const componentManifest: Record<string, QuestionRendererComponent> = {
   OddEvenMultiplePattern:dynamic(()=>import(("@/question-types/odd-even/Grade3/OddEvenMultiplePattern/OddEvenMultiplePattern"))),
   OddEvenParityPuzzleBoard:dynamic(()=>import(("@/question-types/odd-even/Grade3/OddEvenParityPuzzleBoard/OddEvenParityPuzzleBoard"))),
   OddEvenLightObjectWithParity:dynamic(()=>import(("@/question-types/odd-even/Grade3/OddEvenLightObjectWithParity/OddEvenLightObjectWithParity"))),
-  
+  IdentifyUpperLowerCase:dynamic(()=>import(("@/question-types/Reading-Fundamentals/Early_Learner/IdentifyUpperLowerCase/IdentifyUpperLowerCase"))),
+  MatchUpperLowerCaseLetters: dynamic(() => import("@/question-types/Reading-Fundamentals/Early_Learner/MatchUpperLowerCaseLetters/MatchUpperLowerCaseLetters")) as unknown as QuestionRendererComponent,
+  FindTheMissingLetters:dynamic(()=>import("@/question-types/Reading-Fundamentals/Early_Learner/FindTheMissingLetters/FindTheMissingLetters")) as unknown as QuestionRendererComponent,
+  ArrangeLetterAlphaOrder:dynamic(()=>import("@/question-types/Reading-Fundamentals/Early_Learner/ArrangeLetterAlphaOrder/ArrangeLetterAlphaOrder")) as unknown as QuestionRendererComponent,
 
 };
