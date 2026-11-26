@@ -1,9 +1,9 @@
+using kids_app.Services.Service;
 using FluentValidation;
 using kids_app.Data;
 using kids_app.Interfaces;
 using kids_app.Services;
 using kids_app.Services.Interface;
-using kids_app.Services.Service;
 using kids_app.Validators;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -55,7 +55,7 @@ namespace kids_app
             builder.Services.AddScoped<IWorksheetCategory, WorksheetCategoryService>();
             builder.Services.AddScoped<IPreGeneratedWorksheetService,PreGeneratedWorksheetService>();            
             builder.Services.AddScoped<WorksheetQuestionGenerator>();
-
+            builder.Services.AddScoped<IVisualStyleService, VisualStyleService>();
 
             builder.Services.AddScoped<EarlyLevelWorksheetGenerationService>();
             builder.Services.AddScoped<Grade1WorksheetGenerationService>();
