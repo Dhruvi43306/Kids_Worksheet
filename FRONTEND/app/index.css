@@ -21,15 +21,15 @@
   /* Soft Pastel Supporting Palette */
   --ls-soft-blue: #EFF6FF;
   --ls-soft-blue-border: #BFDBFE;
-  --ls-mint-green: #F0FDF4;
-  --ls-mint-green-border: #BBF7D0;
-  --ls-mint-text: #22C55E;
+  --ls-mint-green: #C4B5FD;
+  --ls-mint-green-border: #C4B5FD;
+  --ls-mint-text: #C4B5FD;
   --ls-lavender: #EDE9FE;
   --ls-lavender-border: #C4B5FD;
   --ls-lavender-text: #8B5CF6;
   --ls-warm-yellow: #FFF5D9;
   --ls-warm-yellow-border: #FEE7AC;
-  --ls-yellow-text: #F59E0B;
+  --ls-yellow-text: #C4B5FD;
 
   /* Shadows */
   --ls-shadow-sm: 0 2px 8px rgba(59, 130, 246, 0.07);
@@ -341,11 +341,11 @@
 }
 
 .ls-home-hero__ambient--bottom {
-  width: 380px;
-  height: 380px;
+  width: 320px;
+  height: 340px;
   bottom: -60px;
   left: 40%;
-  background: #DCFCE7;
+  background: #D2E4FC;
 }
 
 .ls-home-hero__inner {
