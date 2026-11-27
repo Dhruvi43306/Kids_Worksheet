@@ -17,14 +17,10 @@ namespace kids_app.Services
             _context = context;
         }
 
-        public async Task<List<WorksheetCategoryDto>>
-            GetCategoriesByTopicAndLevelAsync(
-                int topicId,
-                int levelId)
+        public async Task<List<WorksheetCategoryDto>>GetCategoriesByTopicAndLevelAsync(int topicId,int levelId)
         {
 
-            var configuration =
-                await _context.TopicLevelConfigurations
+            var configuration = await _context.TopicLevelConfigurations
                     .AsNoTracking()
                     .FirstOrDefaultAsync(x =>
                         x.TopicId == topicId &&
@@ -36,13 +32,11 @@ namespace kids_app.Services
                 return new List<WorksheetCategoryDto>();
             }
 
-            int configurationId =
-                configuration.TopicLevelConfigurationId;
+            int configurationId = configuration.TopicLevelConfigurationId;
 
 
 
-            var allowedQuestionTypeIds =
-                await _context.TopicLevelQuestionTypes
+            var allowedQuestionTypeIds = await _context.TopicLevelQuestionTypes
                     .AsNoTracking()
                     .Where(x =>
                         x.TopicLevelConfigurationId == configurationId)
@@ -56,12 +50,9 @@ namespace kids_app.Services
             }
 
 
-            var questionTypesFromDb =
-                await _context.QuestionTypes
+            var questionTypesFromDb = await _context.QuestionTypes
                     .AsNoTracking()
-                    .Where(q =>
-                        allowedQuestionTypeIds.Contains(
-                            q.QuestionTypeId))
+                    .Where(q =>allowedQuestionTypeIds.Contains(q.QuestionTypeId) && q.IsActive)
                     .Select(q => new QuestionTypeDto
                     {
                         QuestionTypeId = q.QuestionTypeId,

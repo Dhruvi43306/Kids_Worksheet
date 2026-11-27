@@ -250,6 +250,24 @@ namespace kids_app.Services
 
                     "DIVISION_TWO_DIGIT_BY_ONE_DIGIT_HORIZONTAL" or  "DIVISION_TWO_DIGIT_BY_ONE_DIGIT_VERTICAL" =>
                         GenerateDivisionHorizontalVertical(questionNumber,questionType.QuestionTypeId,code,levelId,difficultyId,usedGameCombinations),
+                    "IDENTIFY_UPPER_LOWER_CASE_LETTERS" =>
+                                               GenerateIdentifyUpperLowerCase(questionNumber, questionType.QuestionTypeId, levelId, difficultyId, usedGameCombinations),
+
+                    "MATCH_UPPER_LOWER_CASE_LETTERS" or "FIND_THE_MISSING_LETTERS" or "ARRANGE_LETTERS_ALPHA_ORDER" =>
+                            GenerateReadingFundamentalsQuestion(questionNumber, questionType.QuestionTypeId, questionType.Code, levelId, difficultyId, usedGameCombinations),
+
+                    "IDENTIFY_BEGINNING_SOUNDS" or "IDENTIFY_ENDING_SOUNDS" or "MATCH_LETTERS_WITH_SOUNDS" or "CHOOSE_THE_CORRECT_SOUND" =>
+                        GeneratePhonicsSoundsQuestion(questionNumber, questionType.QuestionTypeId, questionType.Code, levelId, difficultyId, usedGameCombinations),
+
+                    "IDENTIFY_SIGHT_WORDS" or "COMPLETE_MISSING_SIGHT_WORDS" or "MATCH_WORDS_WITH_PICTURES" or "CHOOSE_THE_CORRECT_WORD" =>
+                        GenerateSightWordsQuestion(questionNumber, questionType.QuestionTypeId, questionType.Code, levelId, difficultyId, usedGameCombinations),
+
+                    "FIND_MATCHING_RHYMING_WORDS" or "CHOOSE_THE_ODD_RHYMING_WORDS" or "COMPLETE_RHYMING_PAIRS" or "MATCH_PICTURES_WITH_RHYMING_WORDS" =>
+                       GenerateRhymingWordsQuestion(questionNumber, questionType.QuestionTypeId, questionType.Code, levelId, difficultyId, usedGameCombinations),
+                    "READ_AND_IDENTIFY_WORDS" or "ARRANGE_LETTERS_TO_MAKE_WORDS" or "COMPLETE_MISSING_LETTERS_IN_WORDS" =>
+                        GenerateVocabularyDevelopmentQuestion(questionNumber, questionType.QuestionTypeId, questionType.Code, levelId, difficultyId, usedGameCombinations),
+                    "READING_AND_UNDERSTAND_SIMPLE_SENTENCES" or "CHOOSE_THE_CORRECT_SENTENCE" or "COMPLETE_MISSING_WORDS" or "ARRANGE_WORDS_TO_FORM_SENTENCES" =>
+                        GenerateSimpleSentencesQuestion(questionNumber, questionType.QuestionTypeId, questionType.Code, levelId, difficultyId, usedGameCombinations),
 
 
                     _ => throw new ArgumentException(
