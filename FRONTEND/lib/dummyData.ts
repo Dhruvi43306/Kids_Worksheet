@@ -161,8 +161,8 @@ export const categories: Category[] = [
     slug: "reading",
     description: "Strengthen comprehension with stories, characters, and reading practice.",
     icon: "📚",
-    color: "#F4845F",
-    gradient: "linear-gradient(135deg, #F4845F 0%, #F7C948 100%)",
+    color: "#4F8EF7",
+    gradient: "linear-gradient(135deg, #4F8EF7 0%, #7B5EA7 100%)",
     topicCount: 8,
     worksheetCount: 72,
     topics: [

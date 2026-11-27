@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -44,7 +43,7 @@ if (!response.ok) {
     <div className="catpage-wrapper">
       <Navbar />
 
-      <main className="catpage math-page" style={{ "--cat-color": "#3478E8" } as React.CSSProperties}>
+      <main className="catpage math-page" style={{ "--cat-color": "#3B82F6" } as React.CSSProperties}>
         {/* Hero Section */}
         <section className="catpage__hero">
           <div className="catpage__hero-ambient catpage__hero-ambient--1" aria-hidden="true" />
