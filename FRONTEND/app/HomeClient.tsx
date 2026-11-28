@@ -18,9 +18,8 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { categories, popularWorksheets } from "@/lib/dummyData";
+import { categories } from "@/lib/dummyData";
 import CategoryCard from "./components/CategoryCard";
-import WorksheetCard from "./components/WorksheetCard";
 import UnicornPencil from "./components/UnicornPencil";
 import "./index.css";
 import "./unicorn-and-media.css";
